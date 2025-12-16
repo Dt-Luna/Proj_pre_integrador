@@ -1,19 +1,15 @@
 class Usuario:
-    def __init__(self, email, username, senha, idade):
-        self.set_email(email)
-        self.set_username(username)
-        self.set_senha(senha)
-        self.set_idade(idade)
-    def set_email(self,email):
-        self.__email = email
-    def set_username(self, username):
-        self.__username = username
-    def set_senha(self, senha):
-        self.__senha = senha
-    def set_idade(self, idade):
-        self.__idade = idade
-    def get_idade(self): return self.__idade
-    def get_senha(self): return self.__senha
-    def get_username(self): return self.__username
-    def get_email(self): return self.__email
-    def __str__(self): f"{self.__username} - {self.__idade} - {self.__email}"
+    """Modelo de usuário do sistema"""
+    
+    def __init__(self, id_usuario, email, username, senha, idade):
+        self.id_usuario = id_usuario
+        self.email = email
+        self.username = username
+        self.senha = senha
+        self.idade = idade
+
+    def __str__(self):
+        return f"{self.username} - {self.idade} anos - {self.email}"
+
+    def __repr__(self):
+        return f"Usuario(id={self.id_usuario}, username='{self.username}')"

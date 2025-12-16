@@ -1,49 +1,63 @@
 from abc import ABC, abstractmethod
-class DAO(ABC):
-    _objetos = []
-    @classmethod
-    def inserir(cls, obj):
-        cls.abrir()
-        id = 0
-        for aux in cls._objetos:
-            if aux.get_id() > id: id = aux.get_id()
-        obj.set_id(id + 1)
-        cls._objetos.append(obj)
-        cls.salvar()
 
-    @classmethod
-    def listar(cls):
-        cls.abrir()
-        return cls._objetos
 
-    @classmethod
-    def listar_id(cls, id):
-        cls.abrir()
-        for obj in cls._objetos:
-            if obj.get_id() == id: return obj
-        return None
-    
-    @classmethod
-    def atualizar(cls, obj):
-        aux = cls.listar_id(obj.get_id())
-        if aux != None:
-            cls._objetos.remove(aux)
-            cls._objetos.append(obj)
-            cls.salvar()
+class BaseDAO(ABC):
+    """Classe base abstrata para padrão DAO com banco de dados SQLite"""
 
-    @classmethod
-    def excluir(cls, obj):
-        aux = cls.listar_id(obj.get_id())
-        if aux != None:
-            cls._objetos.remove(aux)
-            cls.salvar()
+    def __init__(self, connection):
+        """
+        Inicializa o DAO com uma conexão ao banco de dados
+        
+        Args:
+            connection: Conexão ativa com o banco SQLite
+        """
+        self.conn = connection
+        self.cursor = self.conn.cursor()
+
+    @abstractmethod
+    def inserir(self, obj):
+        """Insere um objeto no banco de dados"""
+        pass
+
+    @abstractmethod
+    def listar(self):
+        """Lista todos os objetos"""
+        pass
+
+    @abstractmethod
+    def listar_por_id(self, id):
+        """Lista um objeto por ID"""
+        pass
+
+    @abstractmethod
+    def atualizar(self, obj):
+        """Atualiza um objeto no banco de dados"""
+        pass
+
+    @abstractmethod
+    def excluir(self, id):
+        """Exclui um objeto do banco de dados"""
+        pass
+
+    def _executar_query(self, query, params=None):
+        """
+        Executa uma query com tratamento de erro
+        
+        Args:
+            query: Comando SQL
+            params: Parâmetros da query
             
-    @classmethod
-    @abstractmethod
-    def abrir(cls):
-        pass
-
-    @classmethod
-    @abstractmethod
-    def salvar(cls):
-        pass
+        Returns:
+            Resultado da query ou None em caso de erro
+        """
+        try:
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
+            self.conn.commit()
+            return self.cursor.fetchall()
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Erro ao executar query: {e}")
+            return None
