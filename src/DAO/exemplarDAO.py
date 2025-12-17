@@ -1,8 +1,10 @@
 from .dao import BaseDAO
+from models.exemplar import Exemplar
+from exceptions import ExemplarException, DAOException
 
 
 class ExemplarDAO(BaseDAO):
-    """DAO para gerenciar exemplares de livros"""
+    """DAO para gerenciar exemplares de livros - Herda de BaseDAO"""
 
     def inserir(self, exemplar):
         """Insere um novo exemplar"""
@@ -13,66 +15,55 @@ class ExemplarDAO(BaseDAO):
             VALUES (?, ?, ?)
             """
             params = (exemplar.id_usuario, exemplar.id_livro, exemplar.status)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.lastrowid
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao inserir exemplar: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir exemplar: {str(e)}")
 
     def listar(self):
         """Lista todos os exemplares"""
         try:
             query = "SELECT * FROM exemplar"
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
+            return self._executar_query(query, fetch=True)
         except Exception as e:
-            print(f"Erro ao listar exemplares: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao listar exemplares: {str(e)}")
 
     def listar_por_id(self, id_exemplar):
         """Lista um exemplar por ID"""
         try:
             query = "SELECT * FROM exemplar WHERE id_exemplar = ?"
-            self.cursor.execute(query, (id_exemplar,))
-            return self.cursor.fetchone()
+            resultado = self._executar_query(query, (id_exemplar,), fetch_one=True)
+            if not resultado:
+                raise ExemplarException.ExemplarNaoEncontrado(f"Exemplar {id_exemplar} não encontrado")
+            return resultado
         except Exception as e:
-            print(f"Erro ao buscar exemplar: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar exemplar: {str(e)}")
 
     def listar_por_usuario(self, id_usuario):
         """Lista exemplares de um usuário"""
         try:
             query = "SELECT * FROM exemplar WHERE id_usuario = ?"
-            self.cursor.execute(query, (id_usuario,))
-            return self.cursor.fetchall()
+            return self._executar_query(query, (id_usuario,), fetch=True)
         except Exception as e:
-            print(f"Erro ao buscar exemplares do usuário: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar exemplares do usuário: {str(e)}")
 
     def listar_por_livro(self, id_livro):
         """Lista exemplares de um livro"""
         try:
             query = "SELECT * FROM exemplar WHERE id_livro = ?"
-            self.cursor.execute(query, (id_livro,))
-            return self.cursor.fetchall()
+            return self._executar_query(query, (id_livro,), fetch=True)
         except Exception as e:
-            print(f"Erro ao buscar exemplares do livro: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar exemplares do livro: {str(e)}")
 
     def listar_por_status(self, status):
         """Lista exemplares por status"""
         try:
             query = "SELECT * FROM exemplar WHERE status = ?"
-            self.cursor.execute(query, (status,))
-            return self.cursor.fetchall()
+            return self._executar_query(query, (status,), fetch=True)
         except Exception as e:
-            print(f"Erro ao buscar exemplares por status: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar exemplares por status: {str(e)}")
 
     def atualizar(self, exemplar):
-        """Atualiza um exemplar existente"""
+        """Atualiza um exemplar"""
         try:
             query = """
             UPDATE exemplar 
@@ -81,22 +72,14 @@ class ExemplarDAO(BaseDAO):
             """
             params = (exemplar.id_usuario, exemplar.id_livro, 
                       exemplar.status, exemplar.id_exemplar)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao atualizar exemplar: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar exemplar: {str(e)}")
 
     def excluir(self, id_exemplar):
         """Exclui um exemplar"""
         try:
             query = "DELETE FROM exemplar WHERE id_exemplar = ?"
-            self.cursor.execute(query, (id_exemplar,))
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, (id_exemplar,))
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao excluir exemplar: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir exemplar: {str(e)}")

@@ -1,8 +1,10 @@
 from .dao import BaseDAO
+from models.livro import Livro
+from exceptions import LivroException, DAOException
 
 
 class LivroDAO(BaseDAO):
-    """DAO para gerenciar livros"""
+    """DAO para gerenciar livros - Herda de BaseDAO"""
 
     def inserir(self, livro):
         """Insere um novo livro"""
@@ -13,53 +15,44 @@ class LivroDAO(BaseDAO):
             VALUES (?, ?, ?, ?)
             """
             params = (livro.titulo, livro.autor, livro.paginas, livro.capa)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.lastrowid
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao inserir livro: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir livro: {str(e)}")
 
     def listar(self):
         """Lista todos os livros"""
         try:
             query = "SELECT * FROM livro"
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
+            return self._executar_query(query, fetch=True)
         except Exception as e:
-            print(f"Erro ao listar livros: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao listar livros: {str(e)}")
 
     def listar_por_id(self, id_livro):
         """Lista um livro por ID"""
         try:
             query = "SELECT * FROM livro WHERE id_livro = ?"
-            self.cursor.execute(query, (id_livro,))
-            return self.cursor.fetchone()
+            resultado = self._executar_query(query, (id_livro,), fetch_one=True)
+            if not resultado:
+                raise LivroException.LivroNaoEncontrado(f"Livro {id_livro} não encontrado")
+            return resultado
         except Exception as e:
-            print(f"Erro ao buscar livro: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar livro: {str(e)}")
 
     def listar_por_autor(self, autor):
         """Lista livros de um autor"""
         try:
             query = "SELECT * FROM livro WHERE autor = ?"
-            self.cursor.execute(query, (autor,))
-            return self.cursor.fetchall()
+            return self._executar_query(query, (autor,), fetch=True)
         except Exception as e:
-            print(f"Erro ao buscar livros por autor: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar livros por autor: {str(e)}")
 
     def listar_por_titulo(self, titulo):
         """Lista livros por título (busca parcial)"""
         try:
             query = "SELECT * FROM livro WHERE titulo LIKE ?"
-            self.cursor.execute(query, (f"%{titulo}%",))
-            return self.cursor.fetchall()
+            return self._executar_query(query, (f"%{titulo}%",), fetch=True)
         except Exception as e:
-            print(f"Erro ao buscar livros por título: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar livros por título: {str(e)}")
 
     def atualizar(self, livro):
         """Atualiza um livro existente"""
@@ -71,22 +64,14 @@ class LivroDAO(BaseDAO):
             """
             params = (livro.titulo, livro.autor, livro.paginas, 
                       livro.capa, livro.id_livro)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao atualizar livro: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar livro: {str(e)}")
 
     def excluir(self, id_livro):
         """Exclui um livro"""
         try:
             query = "DELETE FROM livro WHERE id_livro = ?"
-            self.cursor.execute(query, (id_livro,))
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, (id_livro,))
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao excluir livro: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir livro: {str(e)}")

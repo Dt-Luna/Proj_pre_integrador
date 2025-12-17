@@ -1,8 +1,10 @@
 from .dao import BaseDAO
+from models.historicoemprestimos import HistoricoEmprestimos
+from exceptions import DAOException
 
 
 class HistoricoEmprestimosDAO(BaseDAO):
-    """DAO para gerenciar histórico de empréstimos"""
+    """DAO para gerenciar histórico de empréstimos - Herda de BaseDAO"""
 
     def inserir(self, historico):
         """Insere um novo registro de histórico"""
@@ -13,33 +15,28 @@ class HistoricoEmprestimosDAO(BaseDAO):
             VALUES (?, ?)
             """
             params = (historico.id_emprestimo, historico.status_final)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.lastrowid
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao inserir histórico: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir histórico: {str(e)}")
 
     def listar(self):
         """Lista todo o histórico"""
         try:
             query = "SELECT * FROM historico_emprestimos"
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
+            return self._executar_query(query, fetch=True)
         except Exception as e:
-            print(f"Erro ao listar histórico: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao listar histórico: {str(e)}")
 
     def listar_por_id(self, id_historico):
         """Lista um registro de histórico por ID"""
         try:
             query = "SELECT * FROM historico_emprestimos WHERE id_historico = ?"
-            self.cursor.execute(query, (id_historico,))
-            return self.cursor.fetchone()
+            resultado = self._executar_query(query, (id_historico,), fetch_one=True)
+            if not resultado:
+                raise DAOException.OperacaoFalhou(f"Histórico {id_historico} não encontrado")
+            return resultado
         except Exception as e:
-            print(f"Erro ao buscar histórico: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar histórico: {str(e)}")
 
     def atualizar(self, historico):
         """Atualiza um registro de histórico"""
@@ -50,22 +47,14 @@ class HistoricoEmprestimosDAO(BaseDAO):
             WHERE id_historico = ?
             """
             params = (historico.id_emprestimo, historico.status_final, historico.id_historico)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao atualizar histórico: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar histórico: {str(e)}")
 
     def excluir(self, id_historico):
         """Exclui um registro de histórico"""
         try:
             query = "DELETE FROM historico_emprestimos WHERE id_historico = ?"
-            self.cursor.execute(query, (id_historico,))
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, (id_historico,))
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao excluir histórico: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir histórico: {str(e)}")

@@ -1,8 +1,10 @@
 from .dao import BaseDAO
+from models.avaliacaousuario import AvaliacaoUsuario
+from exceptions import AvaliacaoException, DAOException
 
 
 class AvaliacaoUsuarioDAO(BaseDAO):
-    """DAO para gerenciar avaliações de usuários"""
+    """DAO para gerenciar avaliações de usuários - Herda de BaseDAO"""
 
     def inserir(self, avaliacao):
         """Insere uma nova avaliação de usuário"""
@@ -14,33 +16,28 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             """
             params = (avaliacao.id_avaliador, avaliacao.id_avaliado, 
                       avaliacao.nota, avaliacao.comentario, avaliacao.data_avaliacao)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.lastrowid
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao inserir avaliação: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir avaliação: {str(e)}")
 
     def listar(self):
         """Lista todas as avaliações"""
         try:
             query = "SELECT * FROM avaliacao_usuario"
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
+            return self._executar_query(query, fetch=True)
         except Exception as e:
-            print(f"Erro ao listar avaliações: {e}")
-            return []
+            raise DAOException.OperacaoFalhou(f"Erro ao listar avaliações: {str(e)}")
 
     def listar_por_id(self, id_avaliacao):
         """Lista uma avaliação por ID"""
         try:
             query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
-            self.cursor.execute(query, (id_avaliacao,))
-            return self.cursor.fetchone()
+            resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
+            if not resultado:
+                raise AvaliacaoException.AvaliacaoNaoEncontrada(f"Avaliação {id_avaliacao} não encontrada")
+            return resultado
         except Exception as e:
-            print(f"Erro ao buscar avaliação: {e}")
-            return None
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
 
     def atualizar(self, avaliacao):
         """Atualiza uma avaliação existente"""
@@ -54,22 +51,14 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             params = (avaliacao.id_avaliador, avaliacao.id_avaliado,
                       avaliacao.nota, avaliacao.comentario, 
                       avaliacao.data_avaliacao, avaliacao.id_avaliacao)
-            self.cursor.execute(query, params)
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, params)
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao atualizar avaliação: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar avaliação: {str(e)}")
 
     def excluir(self, id_avaliacao):
         """Exclui uma avaliação"""
         try:
             query = "DELETE FROM avaliacao_usuario WHERE id_avaliacao = ?"
-            self.cursor.execute(query, (id_avaliacao,))
-            self.conn.commit()
-            return self.cursor.rowcount > 0
+            return self._executar_query(query, (id_avaliacao,))
         except Exception as e:
-            self.conn.rollback()
-            print(f"Erro ao excluir avaliação: {e}")
-            return False
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir avaliação: {str(e)}")
