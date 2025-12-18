@@ -4,10 +4,8 @@ from exceptions import AvaliacaoException, DAOException
 
 
 class AvaliacaoUsuarioDAO(BaseDAO):
-    """DAO para gerenciar avaliações de usuários - Herda de BaseDAO"""
 
     def inserir(self, avaliacao):
-        """Insere uma nova avaliação de usuário"""
         try:
             query = """
             INSERT INTO avaliacao_usuario 
@@ -21,7 +19,6 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao inserir avaliação: {str(e)}")
 
     def listar(self):
-        """Lista todas as avaliações"""
         try:
             query = "SELECT * FROM avaliacao_usuario"
             return self._executar_query(query, fetch=True)
@@ -29,7 +26,6 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao listar avaliações: {str(e)}")
 
     def listar_por_id(self, id_avaliacao):
-        """Lista uma avaliação por ID"""
         try:
             query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
             resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
@@ -40,7 +36,6 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
 
     def atualizar(self, avaliacao):
-        """Atualiza uma avaliação existente"""
         try:
             query = """
             UPDATE avaliacao_usuario 
@@ -56,7 +51,6 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar avaliação: {str(e)}")
 
     def excluir(self, id_avaliacao):
-        """Exclui uma avaliação"""
         try:
             query = "DELETE FROM avaliacao_usuario WHERE id_avaliacao = ?"
             return self._executar_query(query, (id_avaliacao,))

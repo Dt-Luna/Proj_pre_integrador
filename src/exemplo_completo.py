@@ -1,14 +1,8 @@
-"""
-Exemplo Completo do Sistema de Agendamento de Serviços - TAREFA 2
-"""
-
 import sys
 from datetime import date, timedelta
 
-# Importações de Banco de Dados
 from database import Database
 
-# Importações de Modelos
 from models.usuario import Usuario
 from models.livro import Livro
 from models.exemplar import Exemplar
@@ -16,7 +10,6 @@ from models.emprestimo import Emprestimo
 from models.solicitacaoemprestimo import SolicitacaoEmprestimo
 from models.avaliacaousuario import AvaliacaoUsuario
 
-# Importações de DAOs (Com herança de BaseDAO)
 from DAO.usuarioDAO import UsuarioDAO
 from DAO.livroDAO import LivroDAO
 from DAO.exemplarDAO import ExemplarDAO
@@ -24,20 +17,17 @@ from DAO.emprestimoDAO import EmprestimoDAO
 from DAO.solicitacaoemprestimoDAO import SolicitacaoEmprestimoDAO
 from DAO.avaliacaousuarioDAO import AvaliacaoUsuarioDAO
 
-# Importações de Sistema
 from models.autenticacao import SistemaAutenticacao
 from exceptions import SistemaException, UsuarioException, LivroException
 
 
 def exibir_titulo(titulo):
-    """Exibe um título formatado"""
     print("\n" + "="*60)
     print(f"  {titulo.upper()}")
     print("="*60 + "\n")
 
 
 def exemplo_validacao_encapsulamento():
-    """Demonstra validação e encapsulamento dos modelos"""
     exibir_titulo("1. Validação e Encapsulamento dos Modelos")
     
     print("📋 Testando validação de usuário:")
@@ -72,7 +62,6 @@ def exemplo_validacao_encapsulamento():
 
 
 def exemplo_usuarios(usuario_dao):
-    """Demonstra CRUD de usuários com tratamento de exceções"""
     exibir_titulo("2. Operações CRUD - Usuários")
     
     # CREATE - Inserir usuários
@@ -181,7 +170,6 @@ def exemplo_livros(livro_dao, usuario_dao):
 
 
 def exemplo_exemplares(exemplar_dao, usuario_id, livro_id):
-    """Demonstra operações com exemplares"""
     exibir_titulo("4. Operações CRUD - Exemplares")
     
     print("📚 Criando exemplares de livros:\n")
@@ -228,7 +216,6 @@ def exemplo_exemplares(exemplar_dao, usuario_id, livro_id):
 
 
 def exemplo_emprestimos(emprestimo_dao, exemplar_id, usuario_dono, usuario_devedor):
-    """Demonstra operações com empréstimos"""
     exibir_titulo("5. Operações CRUD - Empréstimos")
     
     print("📞 Criando empréstimos:\n")
@@ -258,7 +245,6 @@ def exemplo_emprestimos(emprestimo_dao, exemplar_id, usuario_dono, usuario_deved
 
 
 def exemplo_solicitacoes(solicitacao_dao, exemplar_id, solicitante_id):
-    """Demonstra operações com solicitações de empréstimo"""
     exibir_titulo("6. Operações CRUD - Solicitações de Empréstimo")
     
     print("📋 Criando solicitação de empréstimo:\n")
@@ -289,7 +275,6 @@ def exemplo_solicitacoes(solicitacao_dao, exemplar_id, solicitante_id):
 
 
 def exemplo_avaliacoes(avaliacao_dao, avaliador_id, avaliado_id):
-    """Demonstra operações com avaliações"""
     exibir_titulo("7. Operações CRUD - Avaliações de Usuário")
     
     print("⭐ Criando avaliação:\n")
@@ -316,7 +301,6 @@ def exemplo_avaliacoes(avaliacao_dao, avaliador_id, avaliado_id):
 
 
 def exemplo_autenticacao(usuario_dao):
-    """Demonstra sistema de autenticação"""
     exibir_titulo("8. Sistema de Autenticação")
     
     print("🔐 Testando login e logout:\n")
@@ -355,9 +339,8 @@ def exemplo_autenticacao(usuario_dao):
 
 
 def main():
-    """Função principal - executa todo o exemplo da Tarefa 2"""
     print("\n" + "="*60)
-    print("  TAREFA 2 - SISTEMA DE AGENDAMENTO DE SERVIÇOS")
+    print("  BOOKSHARE - Sistema de Empréstimo de Livros")
     print("  Implementação de Modelos e Persistência com Validação")
     print("="*60)
     

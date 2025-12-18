@@ -4,10 +4,8 @@ from exceptions import SolicitacaoException, DAOException
 
 
 class SolicitacaoEmprestimoDAO(BaseDAO):
-    """DAO para gerenciar solicitações de empréstimo - Herda de BaseDAO"""
 
     def inserir(self, solicitacao):
-        """Insere uma nova solicitação de empréstimo"""
         try:
             query = """
             INSERT INTO solicitacao_emprestimo 
@@ -21,7 +19,6 @@ class SolicitacaoEmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao inserir solicitação: {str(e)}")
 
     def listar(self):
-        """Lista todas as solicitações"""
         try:
             query = "SELECT * FROM solicitacao_emprestimo"
             return self._executar_query(query, fetch=True)
@@ -29,7 +26,6 @@ class SolicitacaoEmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao listar solicitações: {str(e)}")
 
     def listar_por_id(self, id_solicitacao):
-        """Lista uma solicitação por ID"""
         try:
             query = "SELECT * FROM solicitacao_emprestimo WHERE id_solicitacao = ?"
             resultado = self._executar_query(query, (id_solicitacao,), fetch_one=True)
@@ -40,7 +36,6 @@ class SolicitacaoEmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar solicitação: {str(e)}")
 
     def atualizar(self, solicitacao):
-        """Atualiza uma solicitação existente"""
         try:
             query = """
             UPDATE solicitacao_emprestimo 
@@ -54,7 +49,6 @@ class SolicitacaoEmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar solicitação: {str(e)}")
 
     def excluir(self, id_solicitacao):
-        """Exclui uma solicitação"""
         try:
             query = "DELETE FROM solicitacao_emprestimo WHERE id_solicitacao = ?"
             return self._executar_query(query, (id_solicitacao,))

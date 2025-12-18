@@ -4,10 +4,8 @@ from exceptions import EmprestimoException, DAOException
 
 
 class EmprestimoDAO(BaseDAO):
-    """DAO para gerenciar empréstimos de livros - Herda de BaseDAO"""
 
     def inserir(self, emprestimo):
-        """Insere um novo empréstimo"""
         try:
             query = """
             INSERT INTO emprestimo 
@@ -21,7 +19,6 @@ class EmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao inserir empréstimo: {str(e)}")
 
     def listar(self):
-        """Lista todos os empréstimos"""
         try:
             query = "SELECT * FROM emprestimo"
             return self._executar_query(query, fetch=True)
@@ -29,7 +26,6 @@ class EmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao listar empréstimos: {str(e)}")
 
     def listar_por_id(self, id_emprestimo):
-        """Lista um empréstimo por ID"""
         try:
             query = "SELECT * FROM emprestimo WHERE id_emprestimo = ?"
             resultado = self._executar_query(query, (id_emprestimo,), fetch_one=True)
@@ -40,7 +36,6 @@ class EmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar empréstimo: {str(e)}")
 
     def atualizar(self, emprestimo):
-        """Atualiza um empréstimo existente"""
         try:
             query = """
             UPDATE emprestimo 
@@ -56,7 +51,6 @@ class EmprestimoDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar empréstimo: {str(e)}")
 
     def excluir(self, id_emprestimo):
-        """Exclui um empréstimo"""
         try:
             query = "DELETE FROM emprestimo WHERE id_emprestimo = ?"
             return self._executar_query(query, (id_emprestimo,))

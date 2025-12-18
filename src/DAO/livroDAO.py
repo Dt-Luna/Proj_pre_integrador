@@ -4,10 +4,8 @@ from exceptions import LivroException, DAOException
 
 
 class LivroDAO(BaseDAO):
-    """DAO para gerenciar livros - Herda de BaseDAO"""
 
     def inserir(self, livro):
-        """Insere um novo livro"""
         try:
             query = """
             INSERT INTO livro 
@@ -20,7 +18,6 @@ class LivroDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao inserir livro: {str(e)}")
 
     def listar(self):
-        """Lista todos os livros"""
         try:
             query = "SELECT * FROM livro"
             return self._executar_query(query, fetch=True)
@@ -28,7 +25,6 @@ class LivroDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao listar livros: {str(e)}")
 
     def listar_por_id(self, id_livro):
-        """Lista um livro por ID"""
         try:
             query = "SELECT * FROM livro WHERE id_livro = ?"
             resultado = self._executar_query(query, (id_livro,), fetch_one=True)
@@ -39,7 +35,6 @@ class LivroDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar livro: {str(e)}")
 
     def listar_por_autor(self, autor):
-        """Lista livros de um autor"""
         try:
             query = "SELECT * FROM livro WHERE autor = ?"
             return self._executar_query(query, (autor,), fetch=True)
@@ -55,7 +50,6 @@ class LivroDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar livros por título: {str(e)}")
 
     def atualizar(self, livro):
-        """Atualiza um livro existente"""
         try:
             query = """
             UPDATE livro 
@@ -69,7 +63,6 @@ class LivroDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar livro: {str(e)}")
 
     def excluir(self, id_livro):
-        """Exclui um livro"""
         try:
             query = "DELETE FROM livro WHERE id_livro = ?"
             return self._executar_query(query, (id_livro,))

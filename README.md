@@ -1,4 +1,4 @@
-# Sistema de Agendamento de Serviços - BookShare
+# Sistema de Empréstimo de Livros - BookShare
 
 ---
 
@@ -34,7 +34,7 @@ src/
 
 ## 🚀 Como Executar
 
-### Exemplo Completo (Tarefa 2)
+### Exemplo Completo
 ```bash
 cd /workspaces/Proj_pre_integrador/src
 python exemplo_completo.py
@@ -209,13 +209,6 @@ Testes incluídos:
 - ✓ Autenticação
 - ✓ Exceções customizadas
 - ✓ Encapsulamento
-
----
-
-## 📚 Documentação
-
-- [TAREFA_2_RESUMO.md](TAREFA_2_RESUMO.md) - Resumo completo da implementação
-- [MELHORIAS.md](MELHORIAS.md) - Melhorias implementadas
 
 ---
 

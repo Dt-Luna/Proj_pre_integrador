@@ -1,48 +1,34 @@
-"""
-Camada de Views - Interface com o usuário
-Implementa templates e menu de operações para cada entidade
-"""
-
-
 class View:
-    """Classe base para todas as views do sistema"""
     
     @staticmethod
     def limpar_tela():
-        """Limpa a tela do console"""
         import os
         os.system('cls' if os.name == 'nt' else 'clear')
     
     @staticmethod
     def exibir_titulo(titulo):
-        """Exibe um título formatado"""
         print("\n" + "=" * 60)
         print(f"  {titulo.upper()}")
         print("=" * 60 + "\n")
     
     @staticmethod
     def exibir_secao(secao):
-        """Exibe uma seção"""
         print(f"\n--- {secao} ---\n")
     
     @staticmethod
     def exibir_sucesso(mensagem):
-        """Exibe mensagem de sucesso"""
         print(f"✓ {mensagem}")
     
     @staticmethod
     def exibir_erro(mensagem):
-        """Exibe mensagem de erro"""
         print(f"✗ Erro: {mensagem}")
     
     @staticmethod
     def exibir_aviso(mensagem):
-        """Exibe mensagem de aviso"""
         print(f"⚠ {mensagem}")
     
     @staticmethod
     def exibir_menu(opcoes):
-        """Exibe um menu com opções"""
         for i, opcao in enumerate(opcoes, 1):
             print(f"{i}. {opcao}")
         print(f"{len(opcoes) + 1}. Sair")
@@ -50,7 +36,6 @@ class View:
     
     @staticmethod
     def input_com_validacao(mensagem, tipo=str):
-        """Input com validação de tipo"""
         while True:
             try:
                 valor = input(f"{mensagem}: ")
@@ -65,13 +50,11 @@ class View:
 
 
 class MenuPrincipal(View):
-    """Menu principal do sistema"""
     
     @staticmethod
     def exibir():
-        """Exibe menu principal"""
         View.limpar_tela()
-        View.exibir_titulo("Sistema de Agendamento de Serviços")
+        View.exibir_titulo("Sistema de Empréstimo de Livros - BookShare")
         
         opcoes = [
             "Gerenciar Usuários",
@@ -87,11 +70,9 @@ class MenuPrincipal(View):
 
 
 class UsuarioView(View):
-    """View para operações com usuários"""
     
     @staticmethod
     def menu_usuario():
-        """Menu de operações com usuários"""
         View.exibir_titulo("Gerenciar Usuários")
         
         opcoes = [
@@ -106,7 +87,6 @@ class UsuarioView(View):
     
     @staticmethod
     def formulario_usuario(editando=False):
-        """Formulário para criar/editar usuário"""
         View.exibir_secao("Formulário de Usuário" if not editando else "Atualizar Usuário")
         
         username = input("Username: ")
@@ -123,7 +103,6 @@ class UsuarioView(View):
     
     @staticmethod
     def exibir_usuarios(usuarios):
-        """Exibe lista de usuários"""
         View.exibir_secao("Usuários Registrados")
         
         if not usuarios:
@@ -139,11 +118,9 @@ class UsuarioView(View):
 
 
 class LivroView(View):
-    """View para operações com livros"""
     
     @staticmethod
     def menu_livro():
-        """Menu de operações com livros"""
         View.exibir_titulo("Gerenciar Livros")
         
         opcoes = [
@@ -158,7 +135,6 @@ class LivroView(View):
     
     @staticmethod
     def formulario_livro():
-        """Formulário para adicionar livro"""
         View.exibir_secao("Formulário de Livro")
         
         titulo = input("Título: ")
@@ -175,7 +151,6 @@ class LivroView(View):
     
     @staticmethod
     def exibir_livros(livros):
-        """Exibe lista de livros"""
         View.exibir_secao("Livros Registrados")
         
         if not livros:
@@ -191,11 +166,9 @@ class LivroView(View):
 
 
 class EmprestimoView(View):
-    """View para operações com empréstimos"""
     
     @staticmethod
     def menu_emprestimo():
-        """Menu de operações com empréstimos"""
         View.exibir_titulo("Gerenciar Empréstimos")
         
         opcoes = [
@@ -209,7 +182,6 @@ class EmprestimoView(View):
     
     @staticmethod
     def exibir_emprestimos(emprestimos):
-        """Exibe lista de empréstimos"""
         View.exibir_secao("Empréstimos Registrados")
         
         if not emprestimos:
@@ -225,11 +197,9 @@ class EmprestimoView(View):
 
 
 class AvaliacaoView(View):
-    """View para operações com avaliações"""
     
     @staticmethod
     def formulario_avaliacao():
-        """Formulário para avaliar usuário"""
         View.exibir_secao("Avaliar Usuário")
         
         id_avaliado = View.input_com_validacao("ID do usuário a avaliar", int)
@@ -244,7 +214,6 @@ class AvaliacaoView(View):
     
     @staticmethod
     def exibir_avaliacoes(avaliacoes):
-        """Exibe lista de avaliações"""
         View.exibir_secao("Avaliações")
         
         if not avaliacoes:

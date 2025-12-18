@@ -6,15 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
-    """Gerenciador de conexão e criação de tabelas do banco de dados SQLite"""
 
     def __init__(self, nome_db="bookshare.db"):
-        """
-        Inicializa a conexão com o banco de dados
-        
-        Args:
-            nome_db: Nome do arquivo do banco de dados
-        """
         try:
             self.conn = sqlite3.connect(nome_db)
             self.cursor = self.conn.cursor()
@@ -25,7 +18,6 @@ class Database:
             raise
 
     def criar_tabelas(self):
-        """Cria as tabelas do banco de dados se não existirem"""
         try:
             # Tabela de usuários
             self.cursor.execute("""
