@@ -1,4 +1,5 @@
-from exceptions import AvaliacaoException
+from exceptions import AvaliacaoException, DAOException
+from .dao import BaseDAO
 from datetime import datetime
 
 
@@ -11,28 +12,36 @@ class AvaliacaoUsuario:
         self._id_avaliacao = id_avaliacao
         self._id_avaliador = id_avaliador
         self._id_avaliado = id_avaliado
-        self.nota = nota 
-        self.comentario = comentario  
-        self.data_avaliacao = data_avaliacao  
+        self._nota = None
+        self._comentario = None
+        self._data_avaliacao = None
+        
+        self.set_nota(nota)
+        self.set_comentario(comentario)
+        self.set_data_avaliacao(data_avaliacao)
 
-    @property
-    def id_avaliacao(self):
+    def get_id(self):
         return self._id_avaliacao
+    
+    def set_id(self, id_avaliacao):
+        self._id_avaliacao = id_avaliacao
 
-    @property
-    def id_avaliador(self):
+    def get_id_avaliador(self):
         return self._id_avaliador
+    
+    def set_id_avaliador(self, value):
+        self._id_avaliador = value
 
-    @property
-    def id_avaliado(self):
+    def get_id_avaliado(self):
         return self._id_avaliado
+    
+    def set_id_avaliado(self, value):
+        self._id_avaliado = value
 
-    @property
-    def nota(self):
+    def get_nota(self):
         return self._nota
     
-    @nota.setter
-    def nota(self, value):
+    def set_nota(self, value):
         valor_int = int(value)
         if valor_int < self.NOTA_MINIMA or valor_int > self.NOTA_MAXIMA:
             raise AvaliacaoException.AvaliacaoInvalida(
@@ -40,24 +49,20 @@ class AvaliacaoUsuario:
             )
         self._nota = valor_int
 
-    @property
-    def comentario(self):
+    def get_comentario(self):
         return self._comentario
     
-    @comentario.setter
-    def comentario(self, value):
+    def set_comentario(self, value):
         if value and len(value.strip()) > 500:
             raise AvaliacaoException.AvaliacaoInvalida(
                 "Comentário não pode exceder 500 caracteres"
             )
         self._comentario = value.strip() if value else ""
 
-    @property
-    def data_avaliacao(self):
+    def get_data_avaliacao(self):
         return self._data_avaliacao
     
-    @data_avaliacao.setter
-    def data_avaliacao(self, value):
+    def set_data_avaliacao(self, value):
         if isinstance(value, str):
             try:
                 datetime.fromisoformat(value)
@@ -68,14 +73,68 @@ class AvaliacaoUsuario:
         self._data_avaliacao = value
 
     def __str__(self):
-        return f"Avaliação: {self.nota}/5 - '{self.comentario[:30]}...'"
+        return f"Avaliação: {self.get_nota()}/5 - '{self.get_comentario()[:30]}...'"
 
     def __repr__(self):
-        """Representação técnica da avaliação"""
-        return f"AvaliacaoUsuario(id={self.id_avaliacao}, nota={self.nota})"
+        return f"AvaliacaoUsuario(id={self.get_id()}, nota={self.get_nota()})"
 
     def __eq__(self, other):
-        """Compara avaliações por ID"""
         if not isinstance(other, AvaliacaoUsuario):
             return False
-        return self.id_avaliacao == other.id_avaliacao
+        return self.get_id() == other.get_id()
+
+
+class AvaliacaoUsuarioDAO(BaseDAO):
+
+    def inserir(self, avaliacao):
+        try:
+            query = """
+            INSERT INTO avaliacao_usuario 
+            (id_avaliador, id_avaliado, nota, comentario, data_avaliacao)
+            VALUES (?, ?, ?, ?, ?)
+            """
+            params = (avaliacao.get_id_avaliador(), avaliacao.get_id_avaliado(), 
+                     avaliacao.get_nota(), avaliacao.get_comentario(), 
+                     avaliacao.get_data_avaliacao())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir avaliação: {str(e)}")
+
+    def listar(self):
+        try:
+            query = "SELECT * FROM avaliacao_usuario"
+            return self._executar_query(query, fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar avaliações: {str(e)}")
+
+    def listar_id(self, id_avaliacao):
+        try:
+            query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
+            resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
+            if not resultado:
+                raise AvaliacaoException.AvaliacaoNaoEncontrada(f"Avaliação {id_avaliacao} não encontrada")
+            return resultado
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
+
+    def atualizar(self, avaliacao):
+        try:
+            query = """
+            UPDATE avaliacao_usuario 
+            SET id_avaliador = ?, id_avaliado = ?, nota = ?, 
+                comentario = ?, data_avaliacao = ?
+            WHERE id_avaliacao = ?
+            """
+            params = (avaliacao.get_id_avaliador(), avaliacao.get_id_avaliado(),
+                     avaliacao.get_nota(), avaliacao.get_comentario(), 
+                     avaliacao.get_data_avaliacao(), avaliacao.get_id())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar avaliação: {str(e)}")
+
+    def excluir(self, id_avaliacao):
+        try:
+            query = "DELETE FROM avaliacao_usuario WHERE id_avaliacao = ?"
+            return self._executar_query(query, (id_avaliacao,))
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir avaliação: {str(e)}")

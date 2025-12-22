@@ -1,66 +1,130 @@
-from exceptions import LivroException
+from exceptions import LivroException, DAOException
+from .dao import BaseDAO
 
 
 class Livro:
     
     def __init__(self, id_livro, titulo, autor, paginas, capa=None):
         self._id_livro = id_livro
-        self.titulo = titulo  
-        self.autor = autor  
-        self.paginas = paginas  
-        self.capa = capa  
+        self._titulo = None
+        self._autor = None
+        self._paginas = None
+        self._capa = capa
+        
+        self.set_titulo(titulo)
+        self.set_autor(autor)
+        self.set_paginas(paginas)
 
-    @property
-    def id_livro(self):
+    def get_id(self):
         return self._id_livro
+    
+    def set_id(self, id_livro):
+        self._id_livro = id_livro
 
-    @property
-    def titulo(self):
+    def get_titulo(self):
         return self._titulo
     
-    @titulo.setter
-    def titulo(self, value):
+    def set_titulo(self, value):
         if not value or len(value.strip()) < 1:
             raise LivroException.DadosInvalidos("Título não pode estar vazio")
         self._titulo = value.strip()
 
-    @property
-    def autor(self):
+    def get_autor(self):
         return self._autor
     
-    @autor.setter
-    def autor(self, value):
+    def set_autor(self, value):
         if not value or len(value.strip()) < 1:
             raise LivroException.DadosInvalidos("Autor não pode estar vazio")
         self._autor = value.strip()
 
-    @property
-    def paginas(self):
+    def get_paginas(self):
         return self._paginas
     
-    @paginas.setter
-    def paginas(self, value):
+    def set_paginas(self, value):
         if value < 1:
             raise LivroException.DadosInvalidos("Livro deve ter pelo menos 1 página")
         self._paginas = int(value)
 
-    @property
-    def capa(self):
+    def get_capa(self):
         return self._capa
     
-    @capa.setter
-    def capa(self, value):
+    def set_capa(self, value):
         self._capa = value
 
     def __str__(self):
-        return f"'{self.titulo}' - {self.autor} ({self.paginas}p)"
+        return f"'{self.get_titulo()}' - {self.get_autor()} ({self.get_paginas()}p)"
 
     def __repr__(self):
-        """Representação técnica do livro"""
-        return f"Livro(id={self.id_livro}, titulo='{self.titulo}')"
+        return f"Livro(id={self.get_id()}, titulo='{self.get_titulo()}')"
 
     def __eq__(self, other):
-        """Compara livros por ID"""
         if not isinstance(other, Livro):
             return False
-        return self.id_livro == other.id_livro
+        return self.get_id() == other.get_id()
+
+
+class LivroDAO(BaseDAO):
+
+    def inserir(self, livro):
+        try:
+            query = """
+            INSERT INTO livro 
+            (titulo, autor, paginas, capa)
+            VALUES (?, ?, ?, ?)
+            """
+            params = (livro.get_titulo(), livro.get_autor(), 
+                     livro.get_paginas(), livro.get_capa())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir livro: {str(e)}")
+
+    def listar(self):
+        try:
+            query = "SELECT * FROM livro"
+            return self._executar_query(query, fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar livros: {str(e)}")
+
+    def listar_id(self, id_livro):
+        try:
+            query = "SELECT * FROM livro WHERE id_livro = ?"
+            resultado = self._executar_query(query, (id_livro,), fetch_one=True)
+            if not resultado:
+                raise LivroException.LivroNaoEncontrado(f"Livro {id_livro} não encontrado")
+            return resultado
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar livro: {str(e)}")
+
+    def listar_por_autor(self, autor):
+        try:
+            query = "SELECT * FROM livro WHERE autor = ?"
+            return self._executar_query(query, (autor,), fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar livros por autor: {str(e)}")
+
+    def listar_por_titulo(self, titulo):
+        try:
+            query = "SELECT * FROM livro WHERE titulo LIKE ?"
+            return self._executar_query(query, (f"%{titulo}%",), fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar livros por título: {str(e)}")
+
+    def atualizar(self, livro):
+        try:
+            query = """
+            UPDATE livro 
+            SET titulo = ?, autor = ?, paginas = ?, capa = ?
+            WHERE id_livro = ?
+            """
+            params = (livro.get_titulo(), livro.get_autor(), livro.get_paginas(), 
+                     livro.get_capa(), livro.get_id())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar livro: {str(e)}")
+
+    def excluir(self, id_livro):
+        try:
+            query = "DELETE FROM livro WHERE id_livro = ?"
+            return self._executar_query(query, (id_livro,))
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir livro: {str(e)}")

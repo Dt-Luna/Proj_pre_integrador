@@ -1,4 +1,5 @@
-from exceptions import SistemaException
+from exceptions import SistemaException, DAOException
+from .dao import BaseDAO
 
 
 class HistoricoEmprestimos:
@@ -11,22 +12,25 @@ class HistoricoEmprestimos:
     def __init__(self, id_historico, id_emprestimo, status_final):
         self._id_historico = id_historico
         self._id_emprestimo = id_emprestimo
-        self.status_final = status_final 
+        self._status_final = None
+        self.set_status_final(status_final)
 
-    @property
-    def id_historico(self):
+    def get_id(self):
         return self._id_historico
+    
+    def set_id(self, id_historico):
+        self._id_historico = id_historico
 
-    @property
-    def id_emprestimo(self):
+    def get_id_emprestimo(self):
         return self._id_emprestimo
+    
+    def set_id_emprestimo(self, value):
+        self._id_emprestimo = value
 
-    @property
-    def status_final(self):
+    def get_status_final(self):
         return self._status_final
     
-    @status_final.setter
-    def status_final(self, value):
+    def set_status_final(self, value):
         if value not in self.STATUSES_VALIDOS:
             raise SistemaException(
                 f"Status '{value}' inválido. Use: {', '.join(self.STATUSES_VALIDOS)}"
@@ -34,14 +38,64 @@ class HistoricoEmprestimos:
         self._status_final = value
 
     def __str__(self):
-        return f"Histórico(Empréstimo:{self.id_emprestimo}, Status:{self.status_final})"
+        return f"Histórico({self.get_id()}) - Empréstimo {self.get_id_emprestimo()}: {self.get_status_final()}"
 
     def __repr__(self):
-        """Representação técnica do histórico"""
-        return f"HistoricoEmprestimos(id={self.id_historico}, status='{self.status_final}')"
+        return f"HistoricoEmprestimos(id={self.get_id()})"
 
     def __eq__(self, other):
-        """Compara históricos por ID"""
         if not isinstance(other, HistoricoEmprestimos):
             return False
-        return self.id_historico == other.id_historico
+        return self.get_id() == other.get_id()
+
+
+class HistoricoEmprestimosDAO(BaseDAO):
+
+    def inserir(self, historico):
+        try:
+            query = """
+            INSERT INTO historico_emprestimos 
+            (id_emprestimo, status_final)
+            VALUES (?, ?)
+            """
+            params = (historico.get_id_emprestimo(), historico.get_status_final())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir histórico: {str(e)}")
+
+    def listar(self):
+        try:
+            query = "SELECT * FROM historico_emprestimos"
+            return self._executar_query(query, fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar histórico: {str(e)}")
+
+    def listar_id(self, id_historico):
+        try:
+            query = "SELECT * FROM historico_emprestimos WHERE id_historico = ?"
+            resultado = self._executar_query(query, (id_historico,), fetch_one=True)
+            if not resultado:
+                raise DAOException.OperacaoFalhou(f"Histórico {id_historico} não encontrado")
+            return resultado
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar histórico: {str(e)}")
+
+    def atualizar(self, historico):
+        try:
+            query = """
+            UPDATE historico_emprestimos 
+            SET id_emprestimo = ?, status_final = ?
+            WHERE id_historico = ?
+            """
+            params = (historico.get_id_emprestimo(), historico.get_status_final(), 
+                     historico.get_id())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar histórico: {str(e)}")
+
+    def excluir(self, id_historico):
+        try:
+            query = "DELETE FROM historico_emprestimos WHERE id_historico = ?"
+            return self._executar_query(query, (id_historico,))
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir histórico: {str(e)}")

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from exceptions import DAOException
 import logging
 
 logger = logging.getLogger(__name__)
@@ -8,9 +7,8 @@ logger = logging.getLogger(__name__)
 class BaseDAO(ABC):
 
     def __init__(self, connection):
-        """
-            DAOException.ConexaoFalhou: Se conexão inválida
-        """
+        from exceptions import DAOException
+        
         if not connection:
             raise DAOException.ConexaoFalhou("Conexão ao banco de dados inválida")
         
@@ -27,7 +25,7 @@ class BaseDAO(ABC):
         pass
 
     @abstractmethod
-    def listar_por_id(self, id):
+    def listar_id(self, id):
         pass
 
     @abstractmethod
@@ -39,13 +37,14 @@ class BaseDAO(ABC):
         pass
 
     def _executar_query(self, query, params=None, fetch=False, fetch_one=False):
+        from exceptions import DAOException
+        
         try:
             if params:
                 self.cursor.execute(query, params)
             else:
                 self.cursor.execute(query)
             
-            # Commit apenas se não for SELECT
             if not query.strip().upper().startswith("SELECT"):
                 self.conn.commit()
                 logger.debug(f"Query executada com sucesso: {query[:50]}...")
@@ -62,7 +61,7 @@ class BaseDAO(ABC):
             logger.error(f"Erro ao executar query: {e}")
             raise DAOException.OperacaoFalhou(f"Erro ao executar operação: {str(e)}")
 
-    def _converter_linha_para_dicionario(self, colunas, linha):
+    def _converter_linha_para_objeto(self, colunas, linha, classe):
         if not linha:
             return None
         return dict(zip(colunas, linha))

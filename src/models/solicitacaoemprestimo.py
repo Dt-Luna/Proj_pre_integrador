@@ -1,4 +1,5 @@
-from exceptions import SolicitacaoException
+from exceptions import SolicitacaoException, DAOException
+from .dao import BaseDAO
 from datetime import datetime
 
 
@@ -14,27 +15,34 @@ class SolicitacaoEmprestimo:
         self._id_solicitacao = id_solicitacao
         self._id_exemplar = id_exemplar
         self._id_solicitante = id_solicitante
-        self.data = data  
-        self.status = status  
+        self._data = None
+        self._status = None
+        
+        self.set_data(data)
+        self.set_status(status)
 
-    @property
-    def id_solicitacao(self):
+    def get_id(self):
         return self._id_solicitacao
+    
+    def set_id(self, id_solicitacao):
+        self._id_solicitacao = id_solicitacao
 
-    @property
-    def id_exemplar(self):
+    def get_id_exemplar(self):
         return self._id_exemplar
+    
+    def set_id_exemplar(self, value):
+        self._id_exemplar = value
 
-    @property
-    def id_solicitante(self):
+    def get_id_solicitante(self):
         return self._id_solicitante
+    
+    def set_id_solicitante(self, value):
+        self._id_solicitante = value
 
-    @property
-    def data(self):
+    def get_data(self):
         return self._data
     
-    @data.setter
-    def data(self, value):
+    def set_data(self, value):
         if isinstance(value, str):
             try:
                 datetime.fromisoformat(value)
@@ -44,51 +52,88 @@ class SolicitacaoEmprestimo:
                 )
         self._data = value
 
-    @property
-    def status(self):
+    def get_status(self):
         return self._status
     
-    @status.setter
-    def status(self, value):
+    def set_status(self, value):
         if value not in self.STATUSES_VALIDOS:
-            raise SolicitacaoException.DadosInvalidos(
+            raise SolicitacaoException.SolicitacaoInvalida(
                 f"Status '{value}' inválido. Use: {', '.join(self.STATUSES_VALIDOS)}"
             )
         self._status = value
 
     def aceitar(self):
-        if self.status != self.STATUS_PENDENTE:
-            raise SolicitacaoException.SolicitacaoInvalida(
-                f"Não é possível aceitar solicitação com status: {self.status}"
-            )
-        self.status = self.STATUS_ACEITA
+        self.set_status(self.STATUS_ACEITA)
 
     def recusar(self):
-        if self.status != self.STATUS_PENDENTE:
-            raise SolicitacaoException.SolicitacaoInvalida(
-                f"Não é possível recusar solicitação com status: {self.status}"
-            )
-        self.status = self.STATUS_RECUSADA
+        self.set_status(self.STATUS_RECUSADA)
 
     def cancelar(self):
-        if self.status not in [self.STATUS_PENDENTE, self.STATUS_ACEITA]:
-            raise SolicitacaoException.SolicitacaoInvalida(
-                f"Não é possível cancelar solicitação com status: {self.status}"
-            )
-        self.status = self.STATUS_CANCELADA
+        self.set_status(self.STATUS_CANCELADA)
 
     def esta_pendente(self):
-        return self.status == self.STATUS_PENDENTE
+        return self.get_status() == self.STATUS_PENDENTE
 
     def __str__(self):
-        return f"Solicitação({self.id_exemplar}) - {self.status} - {self.data}"
+        return f"Solicitação({self.get_id()}) - Status: {self.get_status()}"
 
     def __repr__(self):
-        """Representação técnica da solicitação"""
-        return f"SolicitacaoEmprestimo(id={self.id_solicitacao}, status='{self.status}')"
+        return f"SolicitacaoEmprestimo(id={self.get_id()}, exemplar={self.get_id_exemplar()})"
 
     def __eq__(self, other):
-        """Compara solicitações por ID"""
         if not isinstance(other, SolicitacaoEmprestimo):
             return False
-        return self.id_solicitacao == other.id_solicitacao
+        return self.get_id() == other.get_id()
+
+
+class SolicitacaoEmprestimoDAO(BaseDAO):
+
+    def inserir(self, solicitacao):
+        try:
+            query = """
+            INSERT INTO solicitacao_emprestimo 
+            (id_exemplar, id_solicitante, data_solicitacao, status)
+            VALUES (?, ?, ?, ?)
+            """
+            params = (solicitacao.get_id_exemplar(), solicitacao.get_id_solicitante(), 
+                     solicitacao.get_data(), solicitacao.get_status())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao inserir solicitação: {str(e)}")
+
+    def listar(self):
+        try:
+            query = "SELECT * FROM solicitacao_emprestimo"
+            return self._executar_query(query, fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar solicitações: {str(e)}")
+
+    def listar_id(self, id_solicitacao):
+        try:
+            query = "SELECT * FROM solicitacao_emprestimo WHERE id_solicitacao = ?"
+            resultado = self._executar_query(query, (id_solicitacao,), fetch_one=True)
+            if not resultado:
+                raise SolicitacaoException.SolicitacaoNaoEncontrada(f"Solicitação {id_solicitacao} não encontrada")
+            return resultado
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar solicitação: {str(e)}")
+
+    def atualizar(self, solicitacao):
+        try:
+            query = """
+            UPDATE solicitacao_emprestimo 
+            SET id_exemplar = ?, id_solicitante = ?, data_solicitacao = ?, status = ?
+            WHERE id_solicitacao = ?
+            """
+            params = (solicitacao.get_id_exemplar(), solicitacao.get_id_solicitante(),
+                     solicitacao.get_data(), solicitacao.get_status(), solicitacao.get_id())
+            return self._executar_query(query, params)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao atualizar solicitação: {str(e)}")
+
+    def excluir(self, id_solicitacao):
+        try:
+            query = "DELETE FROM solicitacao_emprestimo WHERE id_solicitacao = ?"
+            return self._executar_query(query, (id_solicitacao,))
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao excluir solicitação: {str(e)}")
