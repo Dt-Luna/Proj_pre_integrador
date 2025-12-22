@@ -381,6 +381,5 @@ def main():
         db.fechar()
         print("\n✓ Banco de dados fechado\n")
 
-
 if __name__ == "__main__":
     main()
