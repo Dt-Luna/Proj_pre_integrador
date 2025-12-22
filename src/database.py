@@ -19,7 +19,6 @@ class Database:
 
     def criar_tabelas(self):
         try:
-            # Tabela de usuários
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS usuario (
                 id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +29,6 @@ class Database:
             )
             """)
 
-            # Tabela de livros
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS livro (
                 id_livro INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +39,6 @@ class Database:
             )
             """)
 
-            # Tabela de exemplares
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS exemplar (
                 id_exemplar INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +50,6 @@ class Database:
             )
             """)
 
-            # Tabela de solicitações de empréstimo
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS solicitacao_emprestimo (
                 id_solicitacao INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,7 +62,6 @@ class Database:
             )
             """)
 
-            # Tabela de empréstimos
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS emprestimo (
                 id_emprestimo INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +77,6 @@ class Database:
             )
             """)
 
-            # Tabela de histórico de empréstimos
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS historico_emprestimos (
                 id_historico INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,7 +86,6 @@ class Database:
             )
             """)
 
-            # Tabela de avaliações de usuário
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS avaliacao_usuario (
                 id_avaliacao INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,16 +106,13 @@ class Database:
             raise
 
     def fechar(self):
-        """Fecha a conexão com o banco de dados"""
         if self.conn:
             self.conn.close()
             logger.info("Conexão fechada")
 
     def __enter__(self):
-        """Context manager - entrada"""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager - saída"""
         self.fechar()
 
