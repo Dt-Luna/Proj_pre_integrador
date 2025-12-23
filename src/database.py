@@ -105,6 +105,30 @@ class Database:
             logger.error(f"Erro ao criar tabelas: {e}")
             raise
 
+    def limpar_dados(self):
+        try:
+            self.cursor.execute("PRAGMA foreign_keys = OFF")
+            
+            tabelas = [
+                "historico_emprestimos",
+                "avaliacao_usuario",
+                "emprestimo",
+                "solicitacao_emprestimo",
+                "exemplar",
+                "livro",
+                "usuario"
+            ]
+            
+            for tabela in tabelas:
+                self.cursor.execute(f"DELETE FROM {tabela}")
+            
+            self.cursor.execute("PRAGMA foreign_keys = ON")
+            self.conn.commit()
+            logger.info("Dados das tabelas limpos com sucesso")
+        except sqlite3.Error as e:
+            logger.error(f"Erro ao limpar dados: {e}")
+            raise
+
     def fechar(self):
         if self.conn:
             self.conn.close()

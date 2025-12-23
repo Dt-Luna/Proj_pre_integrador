@@ -281,6 +281,13 @@ def main():
         print(f"✗ Erro ao conectar ao banco: {e}")
         return
     
+    print("✓ Limpando dados anteriores...")
+    try:
+        db.limpar_dados()
+    except Exception as e:
+        print(f"✗ Erro ao limpar dados: {e}")
+        return
+    
     print("✓ Inicializando DAOs...")
     dao_usuario = UsuarioDAO(db.conn)
     dao_livro = LivroDAO(db.conn)
