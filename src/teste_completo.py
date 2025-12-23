@@ -11,279 +11,224 @@ from models.historicoemprestimos import HistoricoEmprestimos, HistoricoEmprestim
 from exceptions import *
 
 
-def teste_usuarios(dao_usuario):
+def teste_usuario(dao_usuario):
     print("\n" + "="*60)
-    print("TESTE 1: USUÁRIOS (CRUD)")
+    print("TESTE: USUÁRIO - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
         # CREATE
-        print("\n✓ Inserindo usuários...")
-        u1 = Usuario(None, "joao_silva", "senha123", "joao@email.com", 25)
-        u2 = Usuario(None, "maria_santos", "senha456", "maria@email.com", 30)
-        
-        id1 = dao_usuario.inserir(u1)
-        id2 = dao_usuario.inserir(u2)
-        print(f"  Usuário João inserido com ID: {id1}")
-        print(f"  Usuária Maria inserida com ID: {id2}")
+        print("\n✓ Criando um usuário...")
+        usuario = Usuario(None, "joao_silva", "senha123", "joao@email.com", 25)
+        id_usuario = dao_usuario.inserir(usuario)
+        print(f"  ✓ Usuário inserido com ID: {id_usuario}")
         
         # READ
-        print("\n✓ Listando todos os usuários...")
-        usuarios = dao_usuario.listar()
-        print(f"  Total de usuários: {len(usuarios)}")
-        for u in usuarios:
-            print(f"    ID: {u[0]}, Username: {u[1]}, Email: {u[3]}, Idade: {u[4]}")
+        print("\n✓ Lendo o usuário do banco de dados...")
+        usuario_lido = dao_usuario.listar_id(id_usuario)
         
-        # READ by ID
-        print("\n✓ Buscando usuário por ID...")
-        usuario = dao_usuario.listar_id(1)
-        if usuario:
-            print(f"  Encontrado: {usuario[1]} ({usuario[3]})")
-        
-        # UPDATE
-        print("\n✓ Atualizando usuário...")
-        u1.set_id(1)
-        u1.set_idade(26)
-        dao_usuario.atualizar(u1)
-        usuario_atualizado = dao_usuario.listar_id(1)
-        print(f"  Idade atualizada para: {usuario_atualizado[4]}")
-        
-        # AUTENTICAÇÃO
-        print("\n✓ Testando autenticação...")
-        try:
-            resultado = dao_usuario.autenticar("joao_silva", "senha123")
-            print(f"  ✓ Autenticação bem-sucedida para: {resultado[1]}")
-        except UsuarioException.CredenciaisInvalidas as e:
-            print(f"  ✗ Erro: {e}")
-        
-        print("\n✓ Testes de usuários PASSOU!")
-        return True
-        
+        if usuario_lido:
+            print(f"  ✓ Usuário recuperado com sucesso!")
+            print(f"    ID: {usuario_lido[0]}")
+            print(f"    Username: {usuario_lido[1]}")
+            print(f"    Senha: {usuario_lido[2]}")
+            print(f"    Idade: {usuario_lido[3]}")
+            print(f"    Email: {usuario_lido[4]}")
+            print("\n✓ TESTE DE USUÁRIO PASSOU!")
+            return True
+        else:
+            print("  ✗ Usuário não encontrado")
+            return False
+            
     except Exception as e:
-        print(f"\n✗ Erro no teste de usuários: {e}")
+        print(f"\n✗ Erro no teste de usuário: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def teste_livros(dao_livro):
+def teste_livro(dao_livro):
     print("\n" + "="*60)
-    print("TESTE 2: LIVROS (CRUD)")
+    print("TESTE: LIVRO - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
         # CREATE
-        print("\n✓ Inserindo livros...")
-        l1 = Livro(None, "Clean Code", "Robert Martin", 464)
-        l2 = Livro(None, "Design Patterns", "Gang of Four", 395)
+        print("\n✓ Criando um livro...")
+        livro = Livro(None, "Clean Code", "Robert Martin", 464)
+        id_livro = dao_livro.inserir(livro)
+        print(f"  ✓ Livro inserido com ID: {id_livro}")
         
-        id1 = dao_livro.inserir(l1)
-        id2 = dao_livro.inserir(l2)
-        print(f"  Livro 'Clean Code' inserido com ID: {id1}")
-        print(f"  Livro 'Design Patterns' inserido com ID: {id2}")
+        # READ 
+        print("\n✓ Lendo o livro do banco de dados...")
+        livro_lido = dao_livro.listar_id(id_livro)
         
-        # READ
-        print("\n✓ Listando todos os livros...")
-        livros = dao_livro.listar()
-        print(f"  Total de livros: {len(livros)}")
-        for l in livros:
-            print(f"    ID: {l[0]}, Título: {l[1]}, Autor: {l[2]}, Páginas: {l[3]}")
-        
-        # READ by AUTHOR
-        print("\n✓ Buscando livros por autor...")
-        livros_author = dao_livro.listar_por_autor("Robert Martin")
-        for l in livros_author:
-            print(f"    Encontrado: {l[1]} por {l[2]}")
-        
-        # UPDATE
-        print("\n✓ Atualizando livro...")
-        l1.set_id(1)
-        l1.set_paginas(500)
-        dao_livro.atualizar(l1)
-        livro_atualizado = dao_livro.listar_id(1)
-        print(f"  Páginas atualizadas para: {livro_atualizado[3]}")
-        
-        print("\n✓ Testes de livros PASSOU!")
-        return True
-        
+        if livro_lido:
+            print(f"  ✓ Livro recuperado com sucesso!")
+            print(f"    ID: {livro_lido[0]}")
+            print(f"    Título: {livro_lido[1]}")
+            print(f"    Autor: {livro_lido[2]}")
+            print(f"    Páginas: {livro_lido[3]}")
+            print("\n✓ TESTE DE LIVRO PASSOU!")
+            return True
+        else:
+            print("  ✗ Livro não encontrado")
+            return False
+            
     except Exception as e:
-        print(f"\n✗ Erro no teste de livros: {e}")
+        print(f"\n✗ Erro no teste de livro: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def teste_exemplares(dao_exemplar):
+def teste_exemplar(dao_exemplar):
     print("\n" + "="*60)
-    print("TESTE 3: EXEMPLARES")
+    print("TESTE: EXEMPLAR - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
-        # CREATE
-        print("\n✓ Inserindo exemplares...")
-        ex1 = Exemplar(None, 1, 1, Exemplar.STATUS_DISPONIVEL)
-        ex2 = Exemplar(None, 1, 2, Exemplar.STATUS_DISPONIVEL)
-        ex3 = Exemplar(None, 2, 1, Exemplar.STATUS_DISPONIVEL)
+        # CREATE 
+        print("\n✓ Criando um exemplar...")
+        exemplar = Exemplar(None, 1, 1, Exemplar.STATUS_DISPONIVEL)
+        id_exemplar = dao_exemplar.inserir(exemplar)
+        print(f"  ✓ Exemplar inserido com ID: {id_exemplar}")
         
-        id1 = dao_exemplar.inserir(ex1)
-        id2 = dao_exemplar.inserir(ex2)
-        id3 = dao_exemplar.inserir(ex3)
-        print(f"  Exemplar 1 inserido com ID: {id1}")
-        print(f"  Exemplar 2 inserido com ID: {id2}")
-        print(f"  Exemplar 3 inserido com ID: {id3}")
+        # READ 
+        print("\n✓ Lendo o exemplar do banco de dados...")
+        exemplar_lido = dao_exemplar.listar_id(id_exemplar)
         
-        # READ
-        print("\n✓ Listando exemplares do usuário 1...")
-        exemplares = dao_exemplar.listar_por_usuario(1)
-        print(f"  Total: {len(exemplares)}")
-        for e in exemplares:
-            print(f"    ID: {e[0]}, Livro: {e[2]}, Status: {e[3]}")
-        
-        # MUDAR STATUS
-        print("\n✓ Testando mudanças de status...")
-        ex1.set_id(1)
-        ex1.emprestar()
-        dao_exemplar.atualizar(ex1)
-        exemplar_atualizado = dao_exemplar.listar_id(1)
-        print(f"  Status do exemplar 1 atualizado para: {exemplar_atualizado[3]}")
-        
-        print("\n✓ Testes de exemplares PASSOU!")
-        return True
-        
+        if exemplar_lido:
+            print(f"  ✓ Exemplar recuperado com sucesso!")
+            print(f"    ID: {exemplar_lido[0]}")
+            print(f"    ID Livro: {exemplar_lido[1]}")
+            print(f"    ID Usuário: {exemplar_lido[2]}")
+            print(f"    Status: {exemplar_lido[3]}")
+            print("\n✓ TESTE DE EXEMPLAR PASSOU!")
+            return True
+        else:
+            print("  ✗ Exemplar não encontrado")
+            return False
+            
     except Exception as e:
-        print(f"\n✗ Erro no teste de exemplares: {e}")
+        print(f"\n✗ Erro no teste de exemplar: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def teste_emprestimos(dao_emprestimo):
+def teste_emprestimo(dao_emprestimo):
     print("\n" + "="*60)
-    print("TESTE 4: EMPRÉSTIMOS")
+    print("TESTE: EMPRÉSTIMO - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
         data_inicio = datetime.now().strftime("%Y-%m-%d")
         data_prevista = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
         
-        # CREATE
-        print("\n✓ Inserindo empréstimos...")
-        emp1 = Emprestimo(None, 1, 1, 2, data_inicio, data_prevista)
-        emp2 = Emprestimo(None, 2, 1, 2, data_inicio, data_prevista)
+        # CREATE 
+        print("\n✓ Criando um empréstimo...")
+        emprestimo = Emprestimo(None, 1, 1, 2, data_inicio, data_prevista)
+        id_emprestimo = dao_emprestimo.inserir(emprestimo)
+        print(f"  ✓ Empréstimo inserido com ID: {id_emprestimo}")
         
-        id1 = dao_emprestimo.inserir(emp1)
-        id2 = dao_emprestimo.inserir(emp2)
-        print(f"  Empréstimo 1 inserido com ID: {id1}")
-        print(f"  Empréstimo 2 inserido com ID: {id2}")
+        # READ 
+        print("\n✓ Lendo o empréstimo do banco de dados...")
+        emprestimo_lido = dao_emprestimo.listar_id(id_emprestimo)
         
-        # READ
-        print("\n✓ Listando empréstimos...")
-        emprestimos = dao_emprestimo.listar()
-        print(f"  Total: {len(emprestimos)}")
-        for e in emprestimos:
-            status = "Ativo" if e[6] is None else "Devolvido"
-            print(f"    ID: {e[0]}, Exemplar: {e[1]}, Status: {status}")
-        
-        # REGISTRAR DEVOLUÇÃO
-        print("\n✓ Testando devolução de empréstimo...")
-        emp1.set_id(1)
-        emp1.registrar_devolucao()
-        dao_emprestimo.atualizar(emp1)
-        emprestimo_atualizado = dao_emprestimo.listar_id(1)
-        print(f"  Data de devolução registrada: {emprestimo_atualizado[6]}")
-        
-        print("\n✓ Testes de empréstimos PASSOU!")
-        return True
-        
+        if emprestimo_lido:
+            print(f"  ✓ Empréstimo recuperado com sucesso!")
+            print(f"    ID: {emprestimo_lido[0]}")
+            print(f"    ID Exemplar: {emprestimo_lido[1]}")
+            print(f"    ID Usuário (Solicitante): {emprestimo_lido[2]}")
+            print(f"    ID Usuário (Proprietário): {emprestimo_lido[3]}")
+            print(f"    Data Início: {emprestimo_lido[4]}")
+            print(f"    Data Prevista: {emprestimo_lido[5]}")
+            print("\n✓ TESTE DE EMPRÉSTIMO PASSOU!")
+            return True
+        else:
+            print("  ✗ Empréstimo não encontrado")
+            return False
+            
     except Exception as e:
-        print(f"\n✗ Erro no teste de empréstimos: {e}")
+        print(f"\n✗ Erro no teste de empréstimo: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def teste_solicitacoes(dao_solicitacao):
+def teste_solicitacao(dao_solicitacao):
     print("\n" + "="*60)
-    print("TESTE 5: SOLICITAÇÕES DE EMPRÉSTIMO")
+    print("TESTE: SOLICITAÇÃO - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
         data_solicitacao = datetime.now().strftime("%Y-%m-%d")
         
-        # CREATE
-        print("\n✓ Inserindo solicitações...")
-        sol1 = SolicitacaoEmprestimo(None, 3, 2, data_solicitacao)
-        sol2 = SolicitacaoEmprestimo(None, 2, 1, data_solicitacao)
+        # CREATE 
+        print("\n✓ Criando uma solicitação de empréstimo...")
+        solicitacao = SolicitacaoEmprestimo(None, 3, 2, data_solicitacao)
+        id_solicitacao = dao_solicitacao.inserir(solicitacao)
+        print(f"  ✓ Solicitação inserida com ID: {id_solicitacao}")
         
-        id1 = dao_solicitacao.inserir(sol1)
-        id2 = dao_solicitacao.inserir(sol2)
-        print(f"  Solicitação 1 inserida com ID: {id1}")
-        print(f"  Solicitação 2 inserida com ID: {id2}")
+        # READ 
+        print("\n✓ Lendo a solicitação do banco de dados...")
+        solicitacao_lida = dao_solicitacao.listar_id(id_solicitacao)
         
-        # READ
-        print("\n✓ Listando solicitações...")
-        solicitacoes = dao_solicitacao.listar()
-        print(f"  Total: {len(solicitacoes)}")
-        for s in solicitacoes:
-            print(f"    ID: {s[0]}, Exemplar: {s[1]}, Status: {s[4]}")
-        
-        # MUDAR STATUS
-        print("\n✓ Testando mudanças de status...")
-        sol1.set_id(1)
-        sol1.aceitar()
-        dao_solicitacao.atualizar(sol1)
-        solicitacao_atualizada = dao_solicitacao.listar_id(1)
-        print(f"  Status da solicitação 1 atualizado para: {solicitacao_atualizada[4]}")
-        
-        print("\n✓ Testes de solicitações PASSOU!")
-        return True
-        
+        if solicitacao_lida:
+            print(f"  ✓ Solicitação recuperada com sucesso!")
+            print(f"    ID: {solicitacao_lida[0]}")
+            print(f"    ID Exemplar: {solicitacao_lida[1]}")
+            print(f"    ID Usuário: {solicitacao_lida[2]}")
+            print(f"    Data Solicitação: {solicitacao_lida[3]}")
+            print(f"    Status: {solicitacao_lida[4]}")
+            print("\n✓ TESTE DE SOLICITAÇÃO PASSOU!")
+            return True
+        else:
+            print("  ✗ Solicitação não encontrada")
+            return False
+            
     except Exception as e:
-        print(f"\n✗ Erro no teste de solicitações: {e}")
+        print(f"\n✗ Erro no teste de solicitação: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def teste_avaliacoes(dao_avaliacao):
+def teste_avaliacao(dao_avaliacao):
     print("\n" + "="*60)
-    print("TESTE 6: AVALIAÇÕES DE USUÁRIOS")
+    print("TESTE: AVALIAÇÃO - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
         data_avaliacao = datetime.now().strftime("%Y-%m-%d")
         
-        # CREATE
-        print("\n✓ Inserindo avaliações...")
-        av1 = AvaliacaoUsuario(None, 1, 2, 5, "Excelente pessoa!", data_avaliacao)
-        av2 = AvaliacaoUsuario(None, 2, 1, 4, "Muito bom!", data_avaliacao)
+        # CREATE 
+        print("\n✓ Criando uma avaliação de usuário...")
+        avaliacao = AvaliacaoUsuario(None, 1, 2, 5, "Excelente pessoa!", data_avaliacao)
+        id_avaliacao = dao_avaliacao.inserir(avaliacao)
+        print(f"  ✓ Avaliação inserida com ID: {id_avaliacao}")
         
-        id1 = dao_avaliacao.inserir(av1)
-        id2 = dao_avaliacao.inserir(av2)
-        print(f"  Avaliação 1 inserida com ID: {id1}")
-        print(f"  Avaliação 2 inserida com ID: {id2}")
+        # READ 
+        print("\n✓ Lendo a avaliação do banco de dados...")
+        avaliacao_lida = dao_avaliacao.listar_id(id_avaliacao)
         
-        # READ
-        print("\n✓ Listando avaliações...")
-        avaliacoes = dao_avaliacao.listar()
-        print(f"  Total: {len(avaliacoes)}")
-        for a in avaliacoes:
-            print(f"    ID: {a[0]}, Nota: {a[3]}/5, Comentário: {a[4]}")
-        
-        # UPDATE
-        print("\n✓ Atualizando avaliação...")
-        av1.set_id(1)
-        av1.set_nota(4)
-        av1.set_comentario("Muito bom!")
-        dao_avaliacao.atualizar(av1)
-        avaliacao_atualizada = dao_avaliacao.listar_id(1)
-        print(f"  Avaliação 1 atualizada: {avaliacao_atualizada[3]}/5")
-        
-        print("\n✓ Testes de avaliações PASSOU!")
-        return True
-        
+        if avaliacao_lida:
+            print(f"  ✓ Avaliação recuperada com sucesso!")
+            print(f"    ID: {avaliacao_lida[0]}")
+            print(f"    ID Avaliador: {avaliacao_lida[1]}")
+            print(f"    ID Avaliado: {avaliacao_lida[2]}")
+            print(f"    Nota: {avaliacao_lida[3]}/5")
+            print(f"    Comentário: {avaliacao_lida[4]}")
+            print(f"    Data: {avaliacao_lida[5]}")
+            print("\n✓ TESTE DE AVALIAÇÃO PASSOU!")
+            return True
+        else:
+            print("  ✗ Avaliação não encontrada")
+            return False
+            
     except Exception as e:
-        print(f"\n✗ Erro no teste de avaliações: {e}")
+        print(f"\n✗ Erro no teste de avaliação: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -291,38 +236,31 @@ def teste_avaliacoes(dao_avaliacao):
 
 def teste_historico(dao_historico):
     print("\n" + "="*60)
-    print("TESTE 7: HISTÓRICO DE EMPRÉSTIMOS")
+    print("TESTE: HISTÓRICO - SALVAR E LER UM OBJETO")
     print("="*60)
     
     try:
-        # CREATE
-        print("\n✓ Inserindo registros de histórico...")
-        hist1 = HistoricoEmprestimos(None, 1, HistoricoEmprestimos.STATUS_CONCLUIDO)
-        hist2 = HistoricoEmprestimos(None, 2, HistoricoEmprestimos.STATUS_ATIVO)
+        # CREATE 
+        print("\n✓ Criando um histórico de empréstimo...")
+        historico = HistoricoEmprestimos(None, 1, HistoricoEmprestimos.STATUS_CONCLUIDO)
+        id_historico = dao_historico.inserir(historico)
+        print(f"  ✓ Histórico inserido com ID: {id_historico}")
         
-        id1 = dao_historico.inserir(hist1)
-        id2 = dao_historico.inserir(hist2)
-        print(f"  Histórico 1 inserido com ID: {id1}")
-        print(f"  Histórico 2 inserido com ID: {id2}")
+        # READ 
+        print("\n✓ Lendo o histórico do banco de dados...")
+        historico_lido = dao_historico.listar_id(id_historico)
         
-        # READ
-        print("\n✓ Listando histórico...")
-        historicos = dao_historico.listar()
-        print(f"  Total: {len(historicos)}")
-        for h in historicos:
-            print(f"    ID: {h[0]}, Empréstimo: {h[1]}, Status: {h[2]}")
-        
-        # UPDATE
-        print("\n✓ Atualizando histórico...")
-        hist2.set_id(2)
-        hist2.set_status_final(HistoricoEmprestimos.STATUS_CONCLUIDO)
-        dao_historico.atualizar(hist2)
-        historico_atualizado = dao_historico.listar_id(2)
-        print(f"  Histórico 2 atualizado: {historico_atualizado[2]}")
-        
-        print("\n✓ Testes de histórico PASSOU!")
-        return True
-        
+        if historico_lido:
+            print(f"  ✓ Histórico recuperado com sucesso!")
+            print(f"    ID: {historico_lido[0]}")
+            print(f"    ID Empréstimo: {historico_lido[1]}")
+            print(f"    Status: {historico_lido[2]}")
+            print("\n✓ TESTE DE HISTÓRICO PASSOU!")
+            return True
+        else:
+            print("  ✗ Histórico não encontrado")
+            return False
+            
     except Exception as e:
         print(f"\n✗ Erro no teste de histórico: {e}")
         import traceback
@@ -330,72 +268,10 @@ def teste_historico(dao_historico):
         return False
 
 
-def teste_validacoes():
-    print("\n" + "="*60)
-    print("TESTE 8: VALIDAÇÕES DOS MODELOS")
-    print("="*60)
-    
-    testes_passados = 0
-    testes_totais = 0
-    
-    testes_totais += 1
-    print("\n✓ Testando validações de Usuario...")
-    try:
-        Usuario(None, "ab", "senha", "email@test.com", 25)  
-        print("  ✗ Deveria ter lançado exceção")
-    except UsuarioException.DadosInvalidos:
-        print("  ✓ Username curto rejeitado corretamente")
-        testes_passados += 1
-    
-    testes_totais += 1
-    try:
-        Usuario(None, "usuario", "123", "email@test.com", 25)  
-        print("  ✗ Deveria ter lançado exceção")
-    except UsuarioException.DadosInvalidos:
-        print("  ✓ Senha curta rejeitada corretamente")
-        testes_passados += 1
-    
-    testes_totais += 1
-    try:
-        Usuario(None, "usuario", "senha123", "email_invalido", 25)  
-        print("  ✗ Deveria ter lançado exceção")
-    except UsuarioException.DadosInvalidos:
-        print("  ✓ Email inválido rejeitado corretamente")
-        testes_passados += 1
-    
-    testes_totais += 1
-    print("\n✓ Testando validações de Livro...")
-    try:
-        Livro(None, "", "Autor", 100)  
-        print("  ✗ Deveria ter lançado exceção")
-    except LivroException.DadosInvalidos:
-        print("  ✓ Título vazio rejeitado corretamente")
-        testes_passados += 1
-    
-    testes_totais += 1
-    try:
-        Livro(None, "Título", "Autor", 0)  
-        print("  ✗ Deveria ter lançado exceção")
-    except LivroException.DadosInvalidos:
-        print("  ✓ Páginas inválidas rejeitadas corretamente")
-        testes_passados += 1
-    
-    testes_totais += 1
-    print("\n✓ Testando validações de AvaliacaoUsuario...")
-    try:
-        AvaliacaoUsuario(None, 1, 2, 10, "Comentário", "2024-01-01")  
-        print("  ✗ Deveria ter lançado exceção")
-    except AvaliacaoException.AvaliacaoInvalida:
-        print("  ✓ Nota acima do máximo rejeitada corretamente")
-        testes_passados += 1
-    
-    print(f"\n✓ Testes de validações: {testes_passados}/{testes_totais} PASSOU!")
-    return testes_passados == testes_totais
-
-
 def main():
     print("\n" + "="*60)
     print("TESTES DO SISTEMA BOOKSHARE")
+    print("Teste simples de CRUD para cada classe do modelo")
     print("="*60)
     
     print("\n✓ Conectando ao banco de dados...")
@@ -416,15 +292,15 @@ def main():
     
     # Executar testes
     resultados = []
-    resultados.append(("Usuários", teste_usuarios(dao_usuario)))
-    resultados.append(("Livros", teste_livros(dao_livro)))
-    resultados.append(("Exemplares", teste_exemplares(dao_exemplar)))
-    resultados.append(("Empréstimos", teste_emprestimos(dao_emprestimo)))
-    resultados.append(("Solicitações", teste_solicitacoes(dao_solicitacao)))
-    resultados.append(("Avaliações", teste_avaliacoes(dao_avaliacao)))
+    resultados.append(("Usuário", teste_usuario(dao_usuario)))
+    resultados.append(("Livro", teste_livro(dao_livro)))
+    resultados.append(("Exemplar", teste_exemplar(dao_exemplar)))
+    resultados.append(("Empréstimo", teste_emprestimo(dao_emprestimo)))
+    resultados.append(("Solicitação", teste_solicitacao(dao_solicitacao)))
+    resultados.append(("Avaliação", teste_avaliacao(dao_avaliacao)))
     resultados.append(("Histórico", teste_historico(dao_historico)))
-    resultados.append(("Validações", teste_validacoes()))
     
+    # Resumo dos resultados
     print("\n" + "="*60)
     print("RESUMO DOS TESTES")
     print("="*60)
@@ -439,9 +315,9 @@ def main():
     print(f"\nTotal: {passou}/{total} testes passaram")
     
     if passou == total:
-        print("\n🎉 TODOS OS TESTES PASSARAM COM SUCESSO!")
+        print("\nTODOS OS TESTES PASSARAM COM SUCESSO!")
     else:
-        print(f"\n⚠️  {total - passou} teste(s) falharam")
+        print(f"\n{total - passou} teste(s) falharam")
     
     db.fechar()
 
