@@ -22,12 +22,11 @@ src/
 
 ---
 
-## 🛠️ Tecnologias Usadas
+## Tecnologias Usadas
 
 - **Python 3.8+** - Linguagem principal
 - **SQLite3** - Banco de dados
 - **logging** - Rastreamento de erros
 - **ABC (Abstract Base Class)** - Herança abstrata
-- **@property** - Encapsulamento
 
 ---
