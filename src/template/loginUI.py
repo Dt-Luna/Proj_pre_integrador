@@ -1,7 +1,7 @@
 import streamlit as st
 from views import View
 
-class LoginUI:
+class login:
     def main():
         st.title("Entrar no Sistema")
         email = st.text_input("Informe o e-mail")

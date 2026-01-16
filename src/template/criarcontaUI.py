@@ -2,7 +2,7 @@ import streamlit as st
 from views import View
 import time
 
-class AbrirContaUI:
+class criar:
     def main():
         st.title("Abrir Conta no Sistema")
         nome = st.text_input("Informe o nome")

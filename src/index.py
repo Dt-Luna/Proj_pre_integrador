@@ -1,7 +1,8 @@
-from template.manteradmin import manterusuario, manterlivro
-from template.perfil import perfil
-from template.criarconta import AbrirContaUI
-from template import LoginUI
+from template.adminUI import manterusuario, manterlivro
+from template.usuarioUI import biblioteca, solicitacao, avaliar, pesquisa
+from template.perfilUI import perfil
+from template.criarcontaUI import criarconta
+from template.loginUI import login
 from views import Views
 import streamlit as st
 
@@ -10,14 +11,15 @@ class IndexUI:
     def menu_visitante():
         op = st.sidebar.selectbox("Menu", ["Entrar no Sistema", "Abrir Conta"])
         #View.cliente_criar_admin()
-        if op == "Entrar no Sistema": LoginUI.main()
-        if op == "Abrir Conta": AbrirContaUI.main()
+        if op == "Entrar no Sistema": login.main()
+        if op == "Abrir Conta": criarconta.main()
 
     def menu_cliente(): 
-        op = st.sidebar.selectbox("Menu", ["Perfil", "Biblioteca", "Solicitações", "Pesquisa"])
+        op = st.sidebar.selectbox("Menu", ["Perfil", "Biblioteca", "Solicitações","Avaliar", "Pesquisa"])
         if op == "Perfil": perfil.main()
         if op == "Biblioteca": biblioteca.main()
         if op == "Solicitações": solicitacao.main()
+        if op == "Avaliar": avaliar.main()
         if op == "Pesquisa": pesquisa.main()
 
     def menu_admin():            
@@ -36,10 +38,10 @@ class IndexUI:
 
             if admin: IndexUI.menu_admin()
             else: IndexUI.menu_usuario()
-            IndexUI.sair_do_sistema()
+            IndexUI.sair()
     
-    def sair_do_sistema():
-        if st.sidebar.button("Sair"):
+    def sair():
+        if st.sidebar.button("Logout"):
             del st.session_state["usuario_id"]
             del st.session_state["usuario_nome"]
             st.rerun()
