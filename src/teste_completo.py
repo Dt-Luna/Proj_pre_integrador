@@ -7,7 +7,6 @@ from models.exemplar import Exemplar, ExemplarDAO
 from models.emprestimo import Emprestimo, EmprestimoDAO
 from models.solicitacaoemprestimo import SolicitacaoEmprestimo, SolicitacaoEmprestimoDAO
 from models.avaliacaousuario import AvaliacaoUsuario, AvaliacaoUsuarioDAO
-from models.historicoemprestimos import HistoricoEmprestimos, HistoricoEmprestimosDAO
 from exceptions import *
 
 
@@ -234,40 +233,6 @@ def teste_avaliacao(dao_avaliacao):
         return False
 
 
-def teste_historico(dao_historico):
-    print("\n" + "="*60)
-    print("TESTE: HISTÓRICO - SALVAR E LER UM OBJETO")
-    print("="*60)
-    
-    try:
-        # CREATE 
-        print("\n✓ Criando um histórico de empréstimo...")
-        historico = HistoricoEmprestimos(None, 1, HistoricoEmprestimos.STATUS_CONCLUIDO)
-        id_historico = dao_historico.inserir(historico)
-        print(f"  ✓ Histórico inserido com ID: {id_historico}")
-        
-        # READ 
-        print("\n✓ Lendo o histórico do banco de dados...")
-        historico_lido = dao_historico.listar_id(id_historico)
-        
-        if historico_lido:
-            print(f"  ✓ Histórico recuperado com sucesso!")
-            print(f"    ID: {historico_lido[0]}")
-            print(f"    ID Empréstimo: {historico_lido[1]}")
-            print(f"    Status: {historico_lido[2]}")
-            print("\n✓ TESTE DE HISTÓRICO PASSOU!")
-            return True
-        else:
-            print("  ✗ Histórico não encontrado")
-            return False
-            
-    except Exception as e:
-        print(f"\n✗ Erro no teste de histórico: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-
 def main():
     print("\n" + "="*60)
     print("TESTES DO SISTEMA BOOKSHARE")
@@ -295,7 +260,6 @@ def main():
     dao_emprestimo = EmprestimoDAO(db.conn)
     dao_solicitacao = SolicitacaoEmprestimoDAO(db.conn)
     dao_avaliacao = AvaliacaoUsuarioDAO(db.conn)
-    dao_historico = HistoricoEmprestimosDAO(db.conn)
     
     # Executar testes
     resultados = []
@@ -305,7 +269,6 @@ def main():
     resultados.append(("Empréstimo", teste_emprestimo(dao_emprestimo)))
     resultados.append(("Solicitação", teste_solicitacao(dao_solicitacao)))
     resultados.append(("Avaliação", teste_avaliacao(dao_avaliacao)))
-    resultados.append(("Histórico", teste_historico(dao_historico)))
     
     # Resumo dos resultados
     print("\n" + "="*60)

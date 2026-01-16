@@ -78,15 +78,6 @@ class Database:
             """)
 
             self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS historico_emprestimos (
-                id_historico INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_emprestimo INTEGER,
-                status_final TEXT,
-                FOREIGN KEY(id_emprestimo) REFERENCES emprestimo(id_emprestimo)
-            )
-            """)
-
-            self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS avaliacao_usuario (
                 id_avaliacao INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_avaliador INTEGER,
@@ -110,7 +101,6 @@ class Database:
             self.cursor.execute("PRAGMA foreign_keys = OFF")
             
             tabelas = [
-                "historico_emprestimos",
                 "avaliacao_usuario",
                 "emprestimo",
                 "solicitacao_emprestimo",
