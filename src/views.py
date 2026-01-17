@@ -1,6 +1,6 @@
 import sys
 from datetime import datetime, timedelta
-from database import Database
+from dao.database import Database
 from models.usuario import Usuario, UsuarioDAO
 from models.livro import Livro, LivroDAO
 from models.exemplar import Exemplar, ExemplarDAO

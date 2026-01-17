@@ -7,12 +7,10 @@ class Emprestimo:
     
     DURACAO_DIAS = 14
     
-    def __init__(self, id_emprestimo, id_exemplar, id_dono, id_emprestado,
+    def __init__(self, id_emprestimo, id_solicitacao,
                  data_inicio, data_prevista, data_devolucao=None):
         self._id_emprestimo = id_emprestimo
-        self._id_exemplar = id_exemplar
-        self._id_dono = id_dono
-        self._id_emprestado = id_emprestado
+        self._id_solicitacao = id_solicitacao
         self._data_inicio = None
         self._data_prevista = None
         self._data_devolucao = None
@@ -28,23 +26,11 @@ class Emprestimo:
     def set_id(self, id_emprestimo):
         self._id_emprestimo = id_emprestimo
 
-    def get_id_exemplar(self):
-        return self._id_exemplar
+    def get_id_solicitacao(self):
+        return self._id_solicitacao
     
-    def set_id_exemplar(self, value):
-        self._id_exemplar = value
-
-    def get_id_dono(self):
-        return self._id_dono
-    
-    def set_id_dono(self, value):
-        self._id_dono = value
-
-    def get_id_emprestado(self):
-        return self._id_emprestado
-    
-    def set_id_emprestado(self, value):
-        self._id_emprestado = value
+    def set_id_solicitacao(self, value):
+        self._id_solicitacao = value
 
     def get_data_inicio(self):
         return self._data_inicio

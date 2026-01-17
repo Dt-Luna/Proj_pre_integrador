@@ -4,14 +4,13 @@ from datetime import datetime
 
 
 class AvaliacaoUsuario:
-    
     NOTA_MINIMA = 1
     NOTA_MAXIMA = 5
     
-    def __init__(self, id_avaliacao, id_avaliador, id_avaliado, nota, comentario, data_avaliacao):
+    def __init__(self, id_avaliacao, id_avaliador, tipo_avaliador, nota, comentario, data_avaliacao):
         self._id_avaliacao = id_avaliacao
         self._id_avaliador = id_avaliador
-        self._id_avaliado = id_avaliado
+        self._tipo_avaliador = tipo_avaliador
         self._nota = None
         self._comentario = None
         self._data_avaliacao = None
@@ -32,11 +31,11 @@ class AvaliacaoUsuario:
     def set_id_avaliador(self, value):
         self._id_avaliador = value
 
-    def get_id_avaliado(self):
-        return self._id_avaliado
+    def get_tipo_avaliador(self):
+        return self._tipo_avaliador
     
-    def set_id_avaliado(self, value):
-        self._id_avaliado = value
+    def set_tipo_avaliador(self, value):
+        self._tipo_avaliador = value
 
     def get_nota(self):
         return self._nota
@@ -90,12 +89,12 @@ class AvaliacaoUsuarioDAO(BaseDAO):
         try:
             query = """
             INSERT INTO avaliacao_usuario 
-            (id_avaliador, id_avaliado, nota, comentario, data_avaliacao)
-            VALUES (?, ?, ?, ?, ?)
+            (id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao)
+            VALUES (?, ?, ?, ?, ?, ?)
             """
-            params = (avaliacao.get_id_avaliador(), avaliacao.get_id_avaliado(), 
+            params = (avaliacao.get_id_avaliador(), avaliacao.get_tipo_avaliador(), 
                      avaliacao.get_nota(), avaliacao.get_comentario(), 
-                     avaliacao.get_data_avaliacao())
+                     avaliacao.get_id_emprestimo(), avaliacao.get_data_avaliacao())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao inserir avaliação: {str(e)}")
@@ -107,25 +106,38 @@ class AvaliacaoUsuarioDAO(BaseDAO):
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao listar avaliações: {str(e)}")
 
-    def listar_id(self, id_avaliacao):
+    def listar_por_avaliador_emprestimo(self, id_avaliador, id_emprestimo):
         try:
-            query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
-            resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
+            query = "SELECT * FROM avaliacao_usuario WHERE id_avaliador = ? AND id_emprestimo = ?"
+            resultado = self._executar_query(query, (id_avaliador, id_emprestimo), fetch_one=True)
             if not resultado:
-                raise AvaliacaoException.AvaliacaoNaoEncontrada(f"Avaliação {id_avaliacao} não encontrada")
+                raise AvaliacaoException.AvaliacaoNaoEncontrada(
+                    f"Avaliação não encontrada para avaliador {id_avaliador} e empréstimo {id_emprestimo}"
+                )
             return resultado
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
+
+# avaliacao vai ser salvo com chave composta de id_avaliador e id_emprestimo, mas na duvida deixa o codigo de id_avaliacao comentado
+    # def listar_id(self, id_avaliacao):
+    #     try:
+    #         query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
+    #         resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
+    #         if not resultado:
+    #             raise AvaliacaoException.AvaliacaoNaoEncontrada(f"Avaliação {id_avaliacao} não encontrada")
+    #         return resultado
+    #     except Exception as e:
+    #         raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
 
     def atualizar(self, avaliacao):
         try:
             query = """
             UPDATE avaliacao_usuario 
-            SET id_avaliador = ?, id_avaliado = ?, nota = ?, 
+            SET id_avaliador = ?, tipo_avaliador = ?, nota = ?, 
                 comentario = ?, data_avaliacao = ?
             WHERE id_avaliacao = ?
             """
-            params = (avaliacao.get_id_avaliador(), avaliacao.get_id_avaliado(),
+            params = (avaliacao.get_id_avaliador(), avaliacao.get_tipo_avaliador(),
                      avaliacao.get_nota(), avaliacao.get_comentario(), 
                      avaliacao.get_data_avaliacao(), avaliacao.get_id())
             return self._executar_query(query, params)
