@@ -114,41 +114,68 @@ class Views:
         exemplar = Exemplar(id, "", "", "")
         ExemplarDAO.excluir(exemplar)
 ###-------------------------------------------------------------------------------------###
-    def emprestimo_inserir():
-        pass
+    def emprestimo_inserir(id_exemplar, id_dono, id_emprestado, data_inicio, data_prevista):
+        emprestimo = Emprestimo(id_exemplar, id_dono, id_emprestado, data_inicio, data_prevista)
+        EmprestimoDAO.inserir(emprestimo)
+
     def emprestimo_listar():
         r = EmprestimoDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
+        r.sort(key = lambda obj : obj.id_emprestimo())
         return r
+
     def emprestimo_listar_id(id):
-        pass
-    def emprestimo_atualizar(id):
-        pass
+        emprestimo = EmprestimoDAO.listar_id(id)
+        return emprestimo
+
+    def emprestimo_atualizar(id, id_exemplar, id_dono, id_emprestado,
+                 data_inicio, data_prevista, data_devolucao):
+        emprestimo = Emprestimo(id, id_usuario, id_livro)
+        emprestimo.set_data_devolucao(data_devolucao)
+        EmprestimoDAO.atualizar(emprestimo)
+        
     def emprestimo_excluir(id):
-        pass
+        emprestimo = Emprestimo(id, "", "", "", "", "", "")
+        EmprestimoDAO.excluir(emprestimo)
 ###-------------------------------------------------------------------------------------###
-    def solicitacao_inserir():
-        pass
+    def solicitacao_inserir(id_exemplar, id_solicitante, data):
+        solicitacao = SolicitacaoEmprestimo()
+        SolicitacaoEmprestimoDAO(solicitacao)
+
     def solicitacao_listar():
         r = UsuarioDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
+        r.sort(key = lambda obj : obj.id_solicitacao())
         return r
+
     def solicitacao_listar_id(id):
-        pass
-    def solicitacao_atualizar(id):
-        pass
+        solicitacao = SolicitacaoEmprestimoDAO.listar_id(id)
+        return solicitacao
+
+    def solicitacao_atualizar(id, id_exemplar, id_solicitante, data, status):
+        solicitacao = SolicitacaoEmprestimo(id, id_exemplar, id_solicitante, data)
+        solicitacao.set_status(status)
+        SolicitacaoEmprestimoDAO(solicitacao)
+
     def solicitacao_excluir(id):
-        pass
+        solicitacao = SolicitacaoEmprestimo(id, "", "", "", "")
+        SolicitacaoEmprestimoDAO.excluir(solicitacao)
 ###-------------------------------------------------------------------------------------###
-    def avaliacao_inserir():
-        pass
+    def avaliacao_inserir(id_avaliador, id_avaliado, nota, comentario, data_avaliacao):
+        avaliacao = AvaliacaoUsuario(id_avaliador, id_avaliado, nota, comentario, data_avaliacao)
+        AvaliacaoUsuarioDAO.inserir(avaliacao)
+
     def avaliacao_listar():
         r = UsuarioDAO.listar()
         r.sort(key = lambda obj : obj.get_nome())
         return r
+
     def avaliacao_listar_id(id):
-        pass
-    def avaliacao_atualizar(id):
-        pass
+        avaliacao = AvaliacaoUsuarioDAO.listar_id(id)
+        return avaliacao
+
+    def avaliacao_atualizar(id, id_avaliador, id_avaliado, nota, comentario, data_avaliacao):
+        avaliacao = AvaliacaoUsuario(id, id_avaliador, id_avaliado, nota, comentario, data_avaliacao)
+        AvaliacaoUsuarioDAO.atualizar(avaliacao)
+
     def avaliacao_excluir(id):
-        pass
+        avaliacao = AvaliacaoUsuario(id, "", "", "", "", "")
+        AvaliacaoUsuarioDAO.excluir(avaliacao)
