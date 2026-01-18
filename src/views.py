@@ -19,10 +19,10 @@ class Views:
         list = Views.usuario_listar()
         for c in list:
             if c.get_email() == "admin" and c.get_nome() == "admin": return
-        Views.usuario_inserir("admin", "1234", "admin", 20)
+        Views.usuario_inserir("admin", "1234", "admin", '2000-01-01')
 
-    def usuario_inserir(nome, senha, email, idade):
-        usuario = Usuario(nome, senha, email, idade)
+    def usuario_inserir(nome, senha, email, data_nascimento):
+        usuario = Usuario(nome, senha, email, data_nascimento)
         UsuarioDAO.inserir(usuario)
 
     def usuario_listar():
@@ -42,16 +42,16 @@ class Views:
         usuario = UsuarioDAO.listar_por_username(username)
         return usuario
 
-    def usuario_atualizar(id, nome, senha, email, idade):
-        usuario = Usuario(id, nome, senha, email, idade)
+    def usuario_atualizar(id, nome, senha, email, data_nascimento):
+        usuario = Usuario(id, nome, senha, email, data_nascimento)
         UsuarioDAO.atualizar(usuario)
 
     def usuario_excluir(id):
         usuario = Usuario(id, "", "", "", "")
         UsuarioDAO.excluir(usuario)
 ###-------------------------------------------------------------------------------------###
-    def livro_inserir(titulo, autor, paginas):
-        livro = Livro(titulo, autor, paginas)
+    def livro_inserir(titulo, autor, paginas, isbn, capa):
+        livro = Livro(titulo, autor, paginas, isbn, capa)
         LivroDAO.inserir(livro)
 
     def livro_listar():
@@ -71,13 +71,13 @@ class Views:
         livro = LivroDAO.listar_por_titulo(titulo)
         return livro
 
-    def livro_atualizar(id, titulo, autor, paginas, capa):
-        livro = Livro(id, titulo, autor, paginas)
+    def livro_atualizar(id, titulo, autor, paginas, isbn, capa):
+        livro = Livro(id, titulo, autor, isbn, paginas)
         livro.set_capa(capa)
         LivroDAO.atualizar(livro)
 
     def livro_excluir(id):
-        livro = Livro(id, "", "", "", "")
+        livro = Livro(id, "", "", "", "", "")
         LivroDAO.excluir(livro)
 ###-------------------------------------------------------------------------------------###
     def exemplar_inserir(id_usuario, id_livro):
@@ -127,9 +127,9 @@ class Views:
         emprestimo = EmprestimoDAO.listar_id(id)
         return emprestimo
 
-    def emprestimo_atualizar(id, id_exemplar, id_dono, id_emprestado,
+    def emprestimo_atualizar(id, id_solicitacao,
                  data_inicio, data_prevista, data_devolucao):
-        emprestimo = Emprestimo(id, id_usuario, id_livro)
+        emprestimo = Emprestimo(id, id_solicitacao)
         emprestimo.set_data_devolucao(data_devolucao)
         EmprestimoDAO.atualizar(emprestimo)
         
