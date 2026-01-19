@@ -3,7 +3,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class BaseDAO(ABC):
 
     def __init__(self, connection):
@@ -64,8 +63,10 @@ class BaseDAO(ABC):
     def _converter_linha_para_objeto(self, colunas, linha, classe):
         if not linha:
             return None
+            
         return dict(zip(colunas, linha))
-
+        
+    
     def fechar(self):
         if self.conn:
             self.cursor.close()

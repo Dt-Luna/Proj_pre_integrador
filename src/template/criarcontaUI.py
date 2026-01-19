@@ -11,7 +11,6 @@ class criar:
         idade = st.number_input("Informe sua idade")
         
         if st.button("Inserir"):
-            try
             '''
                     Excessões
             '''
