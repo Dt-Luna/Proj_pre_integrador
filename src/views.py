@@ -11,23 +11,24 @@ from exceptions import *
 
 class Views:
     def usuario_autenticar(email, senha):
-        for c in Views.usuario_listar():
-            if c.get_email() == email and c.get_senha() == senha: return{"id": c.get_id(), "nome": c.get_nome(), "email": c.get_email}
+        usuario = UsuarioDAO.autenticar(email, senha)
+        if usuario:
+            return {
+                "id": usuario.get_id(),
+                "username": usuario.get_username(),
+                "email": usuario.get_email(),
+            }
         return None
 
     def criar_admin():
-        list = Views.usuario_listar()
-        for c in list:
-            if c.get_email() == "admin" and c.get_nome() == "admin": return
-        Views.usuario_inserir("admin", "1234", "admin", 20)
+        UsuarioDAO.criar_admin_padrao()
 
-    def usuario_inserir(nome, senha, email, idade):
-        usuario = Usuario(nome, senha, email, idade)
+    def usuario_inserir(nome, senha, email, data_nascimento):
+        usuario = Usuario(None, nome, senha, email, data_nascimento)
         UsuarioDAO.inserir(usuario)
 
     def usuario_listar():
         r = UsuarioDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
         return r
 
     def usuario_listar_por_id(id):
@@ -42,55 +43,47 @@ class Views:
         usuario = UsuarioDAO.listar_por_username(username)
         return usuario
 
-    def usuario_atualizar(id, nome, senha, email, idade):
-        usuario = Usuario(id, nome, senha, email, idade)
+    def usuario_atualizar(id, nome, senha, email, data_nascimento):
+        usuario = Usuario(id, nome, senha, email, data_nascimento)
         UsuarioDAO.atualizar(usuario)
 
     def usuario_excluir(id):
-        usuario = Usuario(id, "", "", "", "")
-        UsuarioDAO.excluir(usuario)
+        UsuarioDAO.excluir(id)
 ###-------------------------------------------------------------------------------------###
-    def livro_inserir(titulo, autor, paginas):
-        livro = Livro(titulo, autor, paginas)
+    def livro_inserir(titulo, autor, paginas, isbn):
+        livro = Livro(None, titulo, autor, paginas, isbn)
         LivroDAO.inserir(livro)
 
     def livro_listar():
         r = LivroDAO.listar()
-        r.sort(key = lambda obj : obj.get_titulo())
         return r
 
     def livro_listar_por_id(id):
         livro = LivroDAO.listar_id(id)
         return livro
 
-    def livro_listar_por_autor(autor):
-        livro = LivroDAO.listar_por_autor(autor)
-        return livro
-
     def livro_listar_por_titulo(titulo):
         livro = LivroDAO.listar_por_titulo(titulo)
         return livro
 
-    def livro_atualizar(id, titulo, autor, paginas, capa):
-        livro = Livro(id, titulo, autor, paginas)
+    def livro_atualizar(id, titulo, autor, paginas, isbn, capa):
+        livro = Livro(id, titulo, autor, paginas, isbn)
         livro.set_capa(capa)
         LivroDAO.atualizar(livro)
 
     def livro_excluir(id):
-        livro = Livro(id, "", "", "", "")
-        LivroDAO.excluir(livro)
+        LivroDAO.excluir(id)
 ###-------------------------------------------------------------------------------------###
     def exemplar_inserir(id_usuario, id_livro):
-        exemplar = Exemplar(id_usuario, id_livro)
+        exemplar = Exemplar(None, id_usuario, id_livro)
         ExemplarDAO.inserir(exemplar)
 
     def exemplar_listar():
         r = ExemplarDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
         return r
 
     def exemplar_listar_por_id(id):
-        exemplar = ExemplarDAO.listar_id()
+        exemplar = ExemplarDAO.listar_id(id)
         return exemplar
 
     def exemplar_listar_por_usuario(id_usuario):
@@ -111,44 +104,52 @@ class Views:
         ExemplarDAO.atualizar(exemplar)
 
     def exemplar_excluir(id):
-        exemplar = Exemplar(id, "", "", "")
-        ExemplarDAO.excluir(exemplar)
+        ExemplarDAO.excluir(id)
 ###-------------------------------------------------------------------------------------###
-    def emprestimo_inserir():
-        pass
+    def emprestimo_inserir(id_solicitacao, data_inicio, data_prevista):
+        emprestimo = Emprestimo(None, id_solicitacao, data_inicio, data_prevista)
+        EmprestimoDAO.inserir(emprestimo)
+        
     def emprestimo_listar():
         r = EmprestimoDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
         return r
+    
     def emprestimo_listar_id(id):
-        pass
-    def emprestimo_atualizar(id):
-        pass
+        emprestimo = EmprestimoDAO.listar_id(id)
+        return emprestimo
+    def emprestimo_atualizar(id, id_solicitacao, data_inicio, data_prevista, data_devolucao):
+        emprestimo = Emprestimo(id, id_solicitacao, data_inicio, data_prevista)
+        emprestimo.set_data_devolucao(data_devolucao)
+        EmprestimoDAO.atualizar(emprestimo)
+        
     def emprestimo_excluir(id):
-        pass
+        EmprestimoDAO.excluir(id)
 ###-------------------------------------------------------------------------------------###
-    def solicitacao_inserir():
-        pass
+    def solicitacao_inserir(id_usuario, id_livro, dias_emprestimo):
+        solicitacao = SolicitacaoEmprestimo(None, datetime.now().strftime("%Y-%m-%d"), "pendente", dias_emprestimo, id_livro, id_usuario)
+        SolicitacaoEmprestimoDAO.inserir(solicitacao)
+        
     def solicitacao_listar():
-        r = UsuarioDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
+        r = SolicitacaoEmprestimoDAO.listar()
         return r
     def solicitacao_listar_id(id):
-        pass
-    def solicitacao_atualizar(id):
-        pass
+        return SolicitacaoEmprestimoDAO.listar_id(id)
+    def solicitacao_atualizar(id, status, dias_emprestimo, id_exemplar, id_solicitante):
+        solicitacao = SolicitacaoEmprestimo(id, datetime.now().strftime("%Y-%m-%d"), status, dias_emprestimo, id_exemplar, id_solicitante)
+        SolicitacaoEmprestimoDAO.atualizar(solicitacao)
     def solicitacao_excluir(id):
-        pass
+        SolicitacaoEmprestimoDAO.excluir(id)
 ###-------------------------------------------------------------------------------------###
-    def avaliacao_inserir():
-        pass
+    def avaliacao_inserir(id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):
+        avaliacao = AvaliacaoUsuario(None, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo)
+        AvaliacaoUsuarioDAO.inserir(avaliacao)
     def avaliacao_listar():
-        r = UsuarioDAO.listar()
-        r.sort(key = lambda obj : obj.get_nome())
+        r = AvaliacaoUsuarioDAO.listar()
         return r
     def avaliacao_listar_id(id):
-        pass
-    def avaliacao_atualizar(id):
-        pass
+        return AvaliacaoUsuarioDAO.listar_id(id)
+    def avaliacao_atualizar(id, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):
+        avaliacao = AvaliacaoUsuario(id, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo)
+        AvaliacaoUsuarioDAO.atualizar(avaliacao)
     def avaliacao_excluir(id):
-        pass
+        AvaliacaoUsuarioDAO.excluir(id)

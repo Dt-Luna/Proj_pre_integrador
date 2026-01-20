@@ -11,9 +11,10 @@ class SolicitacaoEmprestimo:
     STATUS_CANCELADA = "cancelada"
     STATUSES_VALIDOS = [STATUS_PENDENTE, STATUS_ACEITA, STATUS_RECUSADA, STATUS_CANCELADA]
     
-    def __init__(self, id_solicitacao, id_exemplar, id_solicitante, data, status=STATUS_PENDENTE):
+    def __init__(self, id_solicitacao, data, status=STATUS_PENDENTE, dias_emprestimo=None, id_exemplar=None, id_solicitante=None):
         self._id_solicitacao = id_solicitacao
         self._id_exemplar = id_exemplar
+        self._dias_emprestimo = dias_emprestimo
         self._id_solicitante = id_solicitante
         self._data = None
         self._status = None
@@ -26,6 +27,12 @@ class SolicitacaoEmprestimo:
     
     def set_id(self, id_solicitacao):
         self._id_solicitacao = id_solicitacao
+
+    def set_dias_emprestimo(self, value):
+        self._dias_emprestimo = value
+
+    def get_dias_emprestimo(self):
+        return self._dias_emprestimo
 
     def get_id_exemplar(self):
         return self._id_exemplar

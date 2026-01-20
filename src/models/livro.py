@@ -4,16 +4,18 @@ from .dao import BaseDAO
 
 class Livro:
     
-    def __init__(self, id_livro, titulo, autor, paginas, capa=None):
+    def __init__(self, id_livro, titulo, autor, paginas, isbn, capa=None):
         self._id_livro = id_livro
         self._titulo = None
         self._autor = None
         self._paginas = None
+        self._isbn = None
         self._capa = capa
         
         self.set_titulo(titulo)
         self.set_autor(autor)
         self.set_paginas(paginas)
+        self.set_isbn(isbn)
 
     def get_id(self):
         return self._id_livro
@@ -51,6 +53,14 @@ class Livro:
     def set_capa(self, value):
         self._capa = value
 
+    def get_isbn(self):
+        return self._isbn
+
+    def set_isbn(self, value):
+        if not value or len(value.strip()) < 10:
+            raise LivroException.DadosInvalidos("ISBN inválido")
+        self._isbn = value.strip()
+
     def __str__(self):
         return f"'{self.get_titulo()}' - {self.get_autor()} ({self.get_paginas()}p)"
 
@@ -69,18 +79,18 @@ class LivroDAO(BaseDAO):
         try:
             query = """
             INSERT INTO livro 
-            (titulo, autor, paginas, capa)
-            VALUES (?, ?, ?, ?)
+            (titulo, autor, paginas, isbn, capa)
+            VALUES (?, ?, ?, ?, ?)
             """
             params = (livro.get_titulo(), livro.get_autor(), 
-                     livro.get_paginas(), livro.get_capa())
+                     livro.get_paginas(), livro.get_isbn(), livro.get_capa())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao inserir livro: {str(e)}")
 
     def listar(self):
         try:
-            query = "SELECT * FROM livro"
+            query = "SELECT * FROM livro ORDER BY titulo ASC"
             return self._executar_query(query, fetch=True)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao listar livros: {str(e)}")
@@ -113,11 +123,11 @@ class LivroDAO(BaseDAO):
         try:
             query = """
             UPDATE livro 
-            SET titulo = ?, autor = ?, paginas = ?, capa = ?
+            SET titulo = ?, autor = ?, paginas = ?, isbn = ?, capa = ?
             WHERE id_livro = ?
             """
             params = (livro.get_titulo(), livro.get_autor(), livro.get_paginas(), 
-                     livro.get_capa(), livro.get_id())
+                     livro.get_isbn(), livro.get_capa(), livro.get_id())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar livro: {str(e)}")

@@ -2,10 +2,8 @@ from exceptions import EmprestimoException, DAOException
 from .dao import BaseDAO
 from datetime import datetime, timedelta
 
-
 class Emprestimo:
-    
-    DURACAO_DIAS = 14
+
     
     def __init__(self, id_emprestimo, id_solicitacao,
                  data_inicio, data_prevista, data_devolucao=None):
@@ -106,6 +104,17 @@ class Emprestimo:
 
 
 class EmprestimoDAO(BaseDAO):
+    def _montar_objeto(self, dados):
+        if not dados:
+            return None
+
+        return Emprestimo(
+            id_emprestimo=dados[0],
+            id_solicitacao=dados[1],
+            data_inicio=BaseDAO._converter_data(dados[2]),
+            data_prevista=BaseDAO._converter_data(dados[3]),
+            data_devolucao=BaseDAO._converter_data(dados[4])
+        )
 
     def inserir(self, emprestimo):
         try:

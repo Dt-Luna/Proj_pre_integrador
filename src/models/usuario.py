@@ -1,20 +1,22 @@
 from exceptions import UsuarioException, DAOException
+from datetime import datetime
 from .dao import BaseDAO
+import sqlite3
 
 
 class Usuario:
     
-    def __init__(self, id_usuario, username, senha, email, idade):
+    def __init__(self, id_usuario, username, senha, email, data_nascimento):
         self._id_usuario = id_usuario
         self._username = None
         self._senha = None
         self._email = None
-        self._idade = None
+        self.set_data_nascimento = None
         
         self.set_username(username)
         self.set_senha(senha)
         self.set_email(email)
-        self.set_idade(idade)
+        self.set_data_nascimento(data_nascimento)
 
     def get_id(self):
         return self._id_usuario
@@ -52,19 +54,20 @@ class Usuario:
             )
         self._email = value.lower()
 
-    def get_idade(self):
-        return self._idade
-    
-    def set_idade(self, value):
-        if value < 18 or value > 120:
+    def set_data_nascimento(self, value):
+        try:
+            datetime.strptime(value, "%Y-%m-%d")
+            self._data_nascimento = value
+        except ValueError:
             raise UsuarioException.DadosInvalidos(
-                "Idade deve estar entre 18 e 120 anos"
+                "Data de nascimento deve estar no formato YYYY-MM-DD"
             )
-        self._idade = int(value)
+
+    def get_data_nascimento(self):
+        return self._data_nascimento
 
     def __str__(self):
-        return f"{self.get_username()} - {self.get_idade()} anos ({self.get_email()})"
-
+        return f"{self.get_username()} - {(self.get_data_nascimento() - datetime.date.today()).year} ({self.get_email()})"
     def __repr__(self):
         return f"Usuario(id={self.get_id()}, username='{self.get_username()}')"
 
@@ -80,11 +83,11 @@ class UsuarioDAO(BaseDAO):
         try:
             query = """
             INSERT INTO usuario 
-            (username, senha, idade, email)
+            (username, senha, data_nascimento, email)
             VALUES (?, ?, ?, ?)
             """
             params = (usuario.get_username(), usuario.get_senha(), 
-                     usuario.get_idade(), usuario.get_email())
+                     BaseDAO._converter_str_to_data(usuario.get_data_nascimento()), usuario.get_email())
             return self._executar_query(query, params)
         except DAOException.OperacaoFalhou as e:
             if "UNIQUE constraint failed" in str(e):
@@ -97,7 +100,7 @@ class UsuarioDAO(BaseDAO):
 
     def listar(self):
         try:
-            query = "SELECT * FROM usuario"
+            query = "SELECT * FROM usuario ORDER BY username ASC"
             return self._executar_query(query, fetch=True) or []
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao listar usuários: {str(e)}")
@@ -136,11 +139,11 @@ class UsuarioDAO(BaseDAO):
         try:
             query = """
             UPDATE usuario 
-            SET username = ?, senha = ?, email = ?, idade = ?
+            SET username = ?, senha = ?, email = ?, data_nascimento = ?
             WHERE id_usuario = ?
             """
             params = (usuario.get_username(), usuario.get_senha(), 
-                     usuario.get_email(), usuario.get_idade(), usuario.get_id())
+                     usuario.get_email(), BaseDAO._converter_str_to_data(usuario.get_data_nascimento()), usuario.get_id())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar usuário: {str(e)}")
@@ -153,24 +156,41 @@ class UsuarioDAO(BaseDAO):
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao excluir usuário: {str(e)}")
 
-    def autenticar(self, username, senha):
+    @classmethod
+    def autenticar(cls, email, senha):
+        conn = None
         try:
-            resultado = self.listar_por_username(username)
-            if not resultado:
-                raise UsuarioException.CredenciaisInvalidas(
-                    "Username ou senha inválidos"
-                )
+            # 1. Cria a conexão manualmente
+            conn = sqlite3.connect('bookshare.db') # Verifique se o nome do banco está correto
             
-            # Ordem de colunas: id_usuario, username, senha, idade, email
-            id_usuario, username_db, senha_db, idade, email = resultado
+            # 2. Passa a conexão para o construtor da classe (cls)
+            # Isso satisfaz o BaseDAO.__init__(self, connection)
+            dao = cls(conn) 
+            
+            # 3. Usa o DAO normalmente
+            resultado = dao.listar_por_email(email)
+            
+            if not resultado:
+                raise UsuarioException.CredenciaisInvalidas("Email ou senha inválidos")
+            
+            # Ordem das colunas do seu banco (exemplo): 
+            # 0:id, 1:username, 2:senha, 3:nascimento, 4:email
+            # Ajuste os índices abaixo conforme sua tabela real!
+            id_usuario = resultado[0]
+            username_db = resultado[1]
+            senha_db = resultado[2]
             
             if senha_db != senha:
-                raise UsuarioException.CredenciaisInvalidas(
-                    "Username ou senha inválidos"
-                )
+                raise UsuarioException.CredenciaisInvalidas("Email ou senha inválidos")
             
             return resultado
+            
         except UsuarioException:
             raise
         except Exception as e:
+            # Captura erros genéricos
             raise DAOException.OperacaoFalhou(f"Erro ao autenticar: {str(e)}")
+        finally:
+            # 4. Importante: Fecha a conexão independente de erro ou sucesso
+            if conn:
+                conn.close()

@@ -6,8 +6,8 @@ class Exemplar:
     
     STATUS_DISPONIVEL = "disponível"
     STATUS_EMPRESTADO = "emprestado"
-    STATUS_RESERVADO = "reservado"
-    STATUSES_VALIDOS = [STATUS_DISPONIVEL, STATUS_EMPRESTADO, STATUS_RESERVADO]
+    # STATUS_RESERVADO = "reservado"
+    STATUSES_VALIDOS = [STATUS_DISPONIVEL, STATUS_EMPRESTADO]  # , STATUS_RESERVADO]
     
     def __init__(self, id_exemplar, id_usuario, id_livro, status=STATUS_DISPONIVEL):
         self._id_exemplar = id_exemplar
@@ -57,13 +57,13 @@ class Exemplar:
     def devolver(self):
         self.set_status(self.STATUS_DISPONIVEL)
 
-    def reservar(self):
-        if self.get_status() == self.STATUS_EMPRESTADO:
-            self.set_status(self.STATUS_RESERVADO)
-        elif not self.esta_disponivel():
-            raise ExemplarException.ExemplarIndisponivel(
-                f"Não é possível reservar exemplar com status: {self.get_status()}"
-            )
+    # def reservar(self):
+    #     if self.get_status() == self.STATUS_EMPRESTADO:
+    #         self.set_status(self.STATUS_RESERVADO)
+    #     elif not self.esta_disponivel():
+    #         raise ExemplarException.ExemplarIndisponivel(
+    #             f"Não é possível reservar exemplar com status: {self.get_status()}"
+    #         )
 
     def __str__(self):
         return f"Exemplar({self.get_id()}) - Livro:{self.get_id_livro()} - {self.get_status()}"

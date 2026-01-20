@@ -1,25 +1,23 @@
 import streamlit as st
-from views import View
+from views import Views
 import time
 
-class criar:
+class CriarContaUI:
     def main():
+        st.info("Já possui uma conta? Vá para a tela de login.")
         st.title("Abrir Conta no Sistema")
         nome = st.text_input("Informe o nome")
         email = st.text_input("Informe o e-mail")
         senha = st.text_input("Informe a senha", type="password")
-        idade = st.number_input("Informe sua idade")
+        data_nascimento = st.date_input("Informe a data de nascimento")
         
         if st.button("Inserir"):
-            '''
-                    Excessões
-            '''
-
-            View.cliente_inserir(nome, senha, email, idade)
-            st.success("Conta criada com sucesso!")
+            try:
+                Views.usuario_inserir(nome, senha, email, data_nascimento.strftime("%Y-%m-%d"))
+                st.success("Conta criada com sucesso!")
+                time.sleep(2)
+                st.experimental_rerun()
+            except Exception as e:
+                st.error(f"Erro ao criar conta: {e}")
             time.sleep(2)
             st.rerun()
-
-        '''usuario = Usuario(None, "joao_silva", "senha123", "joao@email.com", 25)
-        id_usuario = dao_usuario.inserir(usuario)
-        print(f"  ✓ Usuário inserido com ID: {id_usuario}")'''

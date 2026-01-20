@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import logging
+import sqlite3
 
 logger = logging.getLogger(__name__)
-
 
 class BaseDAO(ABC):
 
@@ -61,10 +61,36 @@ class BaseDAO(ABC):
             logger.error(f"Erro ao executar query: {e}")
             raise DAOException.OperacaoFalhou(f"Erro ao executar operação: {str(e)}")
 
+    def _converter_str_to_data(data_str):
+        from datetime import datetime
+        if data_str:
+            return datetime.strptime(data_str, "%Y-%m-%d").date()
+        return None
+
+    def _converter_data_to_str(data):
+        if data:
+            return data.strftime("%Y-%m-%d")
+        return None
+
     def _converter_linha_para_objeto(self, colunas, linha, classe):
         if not linha:
             return None
         return dict(zip(colunas, linha))
+    
+    def criar_admin_padrao():
+        conn = sqlite3.connect('bookshare.db')
+        cursor = conn.cursor()
+        
+        # Supondo que 'email' seja UNIQUE no seu banco
+        sql = """
+        INSERT OR IGNORE INTO usuario (username, senha, data_nascimento, email) 
+        VALUES ('Administrador', '1234', '2000-01-01', 'admin@sistema.com')
+        """
+        
+        cursor.execute(sql)
+        conn.commit()
+        conn.close()
+
 
     def fechar(self):
         if self.conn:
