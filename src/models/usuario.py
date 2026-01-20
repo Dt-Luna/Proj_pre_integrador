@@ -7,16 +7,17 @@ import sqlite3
 class Usuario:
     
     def __init__(self, id_usuario, username, senha, email, data_nascimento):
-        self._id_usuario = id_usuario
-        self._username = None
-        self._senha = None
-        self._email = None
-        self.set_data_nascimento = None
-        
-        self.set_username(username)
-        self.set_senha(senha)
-        self.set_email(email)
-        self.set_data_nascimento(data_nascimento)
+            self._id_usuario = id_usuario
+            self._username = None
+            self._senha = None
+            self._email = None
+            self._data_nascimento = None  # <--- CORREÇÃO: Adicione o underline (_)
+            
+            # Agora os métodos setters funcionam
+            self.set_username(username)
+            self.set_senha(senha)
+            self.set_email(email)
+            self.set_data_nascimento(data_nascimento)
 
     def get_id(self):
         return self._id_usuario

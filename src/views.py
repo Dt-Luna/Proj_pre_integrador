@@ -10,13 +10,17 @@ from models.avaliacaousuario import AvaliacaoUsuario, AvaliacaoUsuarioDAO
 from exceptions import *
 
 class Views:
+    @staticmethod
     def usuario_autenticar(email, senha):
+        # O DAO retorna uma TUPLA: (id, username, senha, nascimento, email)
         usuario = UsuarioDAO.autenticar(email, senha)
+        
         if usuario:
+            # Convertendo a Tupla para Dicionário
             return {
-                "id": usuario.get_id(),
-                "username": usuario.get_username(),
-                "email": usuario.get_email(),
+                "id": usuario[0],       # Índice 0 é o ID
+                "username": usuario[1], # Índice 1 é o Username
+                "email": usuario[4],    # Índice 4 é o Email
             }
         return None
 
