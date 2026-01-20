@@ -45,6 +45,8 @@ class Views:
 
     def usuario_atualizar(id, nome, senha, email, data_nascimento):
         usuario = Usuario(id, nome, senha, email, data_nascimento)
+    def usuario_atualizar(id, nome, senha, email, data_nascimento):
+        usuario = Usuario(id, nome, senha, email, data_nascimento)
         UsuarioDAO.atualizar(usuario)
 
     def usuario_excluir(id):
@@ -132,6 +134,7 @@ class Views:
     def solicitacao_listar():
         r = SolicitacaoEmprestimoDAO.listar()
         return r
+
     def solicitacao_listar_id(id):
         return SolicitacaoEmprestimoDAO.listar_id(id)
     def solicitacao_atualizar(id, status, dias_emprestimo, id_exemplar, id_solicitante):
@@ -146,6 +149,7 @@ class Views:
     def avaliacao_listar():
         r = AvaliacaoUsuarioDAO.listar()
         return r
+
     def avaliacao_listar_id(id):
         return AvaliacaoUsuarioDAO.listar_id(id)
     def avaliacao_atualizar(id, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):

@@ -75,6 +75,7 @@ class BaseDAO(ABC):
     def _converter_linha_para_objeto(self, colunas, linha, classe):
         if not linha:
             return None
+            
         return dict(zip(colunas, linha))
     
     def criar_admin_padrao():
