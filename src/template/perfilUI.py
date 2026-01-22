@@ -23,7 +23,6 @@ class PerfilUI:
         novo_email = st.text_input("E-mail", value=email_atual)
         nova_senha = st.text_input("Nova Senha (deixe em branco para manter)", type="password")
         
-        # Converter string para date para o widget date_input
         try:
             data_obj = datetime.strptime(data_nascimento_atual, "%Y-%m-%d").date()
         except (ValueError, TypeError):
