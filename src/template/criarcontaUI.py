@@ -17,7 +17,7 @@ class CriarContaUI:
                 Views.usuario_inserir(nome, senha, email, data_nascimento.strftime("%Y-%m-%d"))
                 st.success("Conta criada com sucesso!")
                 time.sleep(2)
-                st.experimental_rerun()
+                st.rerun()
             except Exception as e:
                 st.error(f"Erro ao criar conta: {e}")
             time.sleep(2)

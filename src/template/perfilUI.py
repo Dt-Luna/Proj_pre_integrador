@@ -1,6 +1,7 @@
 import streamlit as st
 from views import Views
 from datetime import datetime, date
+import time
 
 class PerfilUI:
     def main():
@@ -58,6 +59,8 @@ class PerfilUI:
                 )
                 
                 st.success("Perfil atualizado com sucesso!")
+                time.sleep(2)
+                st.rerun()
                 
                 # Atualiza a sessão com os novos dados para refletir na hora
                 st.session_state["usuario_nome"] = novo_nome
