@@ -78,6 +78,7 @@ class BaseDAO(ABC):
             
         return dict(zip(colunas, linha))
     
+    @staticmethod
     def criar_admin_padrao():
         conn = sqlite3.connect('bookshare.db')
         cursor = conn.cursor()

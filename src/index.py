@@ -78,6 +78,7 @@ class IndexUI:
             if "usuario_id" in st.session_state: del st.session_state["usuario_id"]
             if "usuario_nome" in st.session_state: del st.session_state["usuario_nome"]
             if "usuario_email" in st.session_state: del st.session_state["usuario_email"]
+            if "usuario_data_nascimento" in st.session_state: del st.session_state["usuario_data_nascimento"]
             st.rerun()
 
     @staticmethod

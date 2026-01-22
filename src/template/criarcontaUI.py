@@ -1,6 +1,7 @@
 import streamlit as st
 from views import Views
 import time
+from datetime import date
 
 class CriarContaUI:
     def main():
@@ -9,7 +10,7 @@ class CriarContaUI:
         nome = st.text_input("Informe o nome")
         email = st.text_input("Informe o e-mail")
         senha = st.text_input("Informe a senha", type="password")
-        data_nascimento = st.date_input("Informe a data de nascimento")
+        data_nascimento = st.date_input("Informe a data de nascimento", min_value=date(1925, 1, 1), max_value=date.today())
         
         if st.button("Inserir"):
             try:

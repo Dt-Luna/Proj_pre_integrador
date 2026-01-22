@@ -20,6 +20,7 @@ class LoginUI:
                     user_id = usuario['id']
                     user_nome = usuario['username']
                     user_email = usuario['email']
+                    user_data_nascimento = usuario.get('data_nascimento', '2000-01-01')
                     # ---------------------
 
                     st.success(f"Bem-vindo(a), {user_nome}!")
@@ -28,6 +29,7 @@ class LoginUI:
                     st.session_state["usuario_id"] = user_id
                     st.session_state["usuario_nome"] = user_nome
                     st.session_state["usuario_email"] = user_email
+                    st.session_state["usuario_data_nascimento"] = user_data_nascimento
                     st.session_state["usuario_logado"] = True # Flag extra útil
 
                     time.sleep(1) 
