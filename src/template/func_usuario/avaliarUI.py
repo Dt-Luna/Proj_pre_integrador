@@ -5,3 +5,4 @@ from datetime import datetime
 class AvaliarUI:
     def main():
         st.title("Avaliar")
+        

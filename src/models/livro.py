@@ -138,3 +138,4 @@ class LivroDAO(BaseDAO):
             return self._executar_query(query, (id_livro,))
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao excluir livro: {str(e)}")
+    

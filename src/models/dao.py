@@ -85,7 +85,7 @@ class BaseDAO(ABC):
         # Supondo que 'email' seja UNIQUE no seu banco
         sql = """
         INSERT OR IGNORE INTO usuario (username, senha, data_nascimento, email) 
-        VALUES ('Administrador', '1234', '2000-01-01', 'admin@sistema.com')
+        VALUES ('Administrador', '123456', '2000-01-01', 'admin@sistema.com')
         """
         
         cursor.execute(sql)
