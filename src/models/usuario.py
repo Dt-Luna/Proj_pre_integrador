@@ -164,19 +164,14 @@ class UsuarioDAO(BaseDAO):
             # 1. Cria a conexão manualmente
             conn = sqlite3.connect('bookshare.db') # Verifique se o nome do banco está correto
             
-            # 2. Passa a conexão para o construtor da classe (cls)
-            # Isso satisfaz o BaseDAO.__init__(self, connection)
             dao = cls(conn) 
             
-            # 3. Usa o DAO normalmente
-            resultado = dao.listar_por_email(email)
+            # 3. Usa o DAO normalmente - converter email para lowercase
+            resultado = dao.listar_por_email(email.lower())
             
             if not resultado:
                 raise UsuarioException.CredenciaisInvalidas("Email ou senha inválidos")
             
-            # Ordem das colunas do seu banco (exemplo): 
-            # 0:id, 1:username, 2:senha, 3:nascimento, 4:email
-            # Ajuste os índices abaixo conforme sua tabela real!
             id_usuario = resultado[0]
             username_db = resultado[1]
             senha_db = resultado[2]
@@ -189,9 +184,7 @@ class UsuarioDAO(BaseDAO):
         except UsuarioException:
             raise
         except Exception as e:
-            # Captura erros genéricos
             raise DAOException.OperacaoFalhou(f"Erro ao autenticar: {str(e)}")
         finally:
-            # 4. Importante: Fecha a conexão independente de erro ou sucesso
             if conn:
                 conn.close()
