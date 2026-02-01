@@ -119,15 +119,15 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
 
 # avaliacao vai ser salvo com chave composta de id_avaliador e id_emprestimo, mas na duvida deixa o codigo de id_avaliacao comentado
-    # def listar_id(self, id_avaliacao):
-    #     try:
-    #         query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
-    #         resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
-    #         if not resultado:
-    #             raise AvaliacaoException.AvaliacaoNaoEncontrada(f"Avaliação {id_avaliacao} não encontrada")
-    #         return resultado
-    #     except Exception as e:
-    #         raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
+    def listar_id(self, id_avaliacao):
+        try:
+            query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"
+            resultado = self._executar_query(query, (id_avaliacao,), fetch_one=True)
+            if not resultado:
+                raise AvaliacaoException.AvaliacaoNaoEncontrada(f"Avaliação {id_avaliacao} não encontrada")
+            return resultado
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
 
     def atualizar(self, avaliacao):
         try:

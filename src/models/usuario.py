@@ -135,7 +135,7 @@ class UsuarioDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(
                 f"Erro ao buscar usuário por username: {str(e)}"
             )
-
+        
     def atualizar(self, usuario):
         try:
             query = """

@@ -50,8 +50,8 @@ class IndexUI:
             
             is_admin = False
             
-            # Verificação provisória
-            if st.session_state.get("usuario_nome") == "Administrador": # Nome exato do DAO
+            # Verificação provisória (ajuste conforme seu LoginUI):
+            if st.session_state.get("usuario_email") == "admin@sistema.com": # Email exato do admin no banco
                 is_admin = True
             
 
