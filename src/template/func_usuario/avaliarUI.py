@@ -3,7 +3,7 @@ from views import Views
 from datetime import datetime
 import pandas as pd
 import time
-
+#comentário
 class AvaliarUI:
     def main():
         st.title("Avaliar")
