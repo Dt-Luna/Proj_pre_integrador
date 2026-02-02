@@ -6,28 +6,63 @@ import time
 class BibliotecaUI:
     def main():
         st.title("Biblioteca")
-        tab1, tab2 = st.tabs(["Meus Exemplares", "Adicionar exemplar"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Listar Exemplares", "Adicionar exemplar", "Atualizar Exemplar", "Excluir Exemplar"])
         with tab1: BibliotecaUI.Ver()
         with tab2: BibliotecaUI.Adicionar()
+        #with tab3: BibliotecaUI.atualizar_exemplar()
+        with tab4: BibliotecaUI.excluir_exemplar()
 
     def Ver():
-        user_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
-        if len(user_exemplares) == 0: st.write("Você não tem exemplares cadastrados")
-        else:
-            list_dic = []
+        st.header("Listar Exemplares")
+        try:
+            user_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
+            if len(user_exemplares) == 0: st.write("Você não tem exemplares cadastrados")
+            else:
+                list_dic = []
 
-            for obj in user_exemplares: list_dic.append(obj.to_df())
-            df = pd.DataFrame(list_dic)
-            st.dataframe(df)
+                for obj in user_exemplares: list_dic.append(obj.to_df())
+                df = pd.DataFrame(list_dic)
+                st.dataframe(df)
+                
+        except Exception as e:
+            st.error(f"Erro ao listar exemplares: {e}")
 
     def Adicionar():
         livros = Views.livro_listar()      
-        if len(livros) == 0: st.write("Não há livro modelo cadastrado")
-        else:
+        if livros: 
+            id_usuario = st.session_state.get("usuario_id")
             op = st.selectbox("Selecione o livro modelo: ", livros)
-            if st.button("Inserir a biblioteca"):
 
-                Views.exemplar_inserir(st.session_state["usuario_id"], op)
+            if st.button("Inserir a biblioteca"):
+                Views.exemplar_inserir(id_usuario, op)
                 st.success(f"Exemplar de {op.get_titulo()} inserido na sua biblioteca com sucesso!")
                 time.sleep(2)
                 st.rerun()
+        else:
+            st.write("Não há livro modelo cadastrado")
+
+    # def atualizar_exemplar():
+        # exemplares = Views.exemplar_listar_por_usuario(st.session_state.get('usuario_id'))
+        # livros = Views.livro_listar()
+        # if exemplares:
+        #     op = st.selectbox('Selecione o exemplar', exemplares)
+        #     livro = st.selectbox('Selecione o livro', livros)
+        #     if st.button('Atualizar'):
+        #         try:
+        #             Views.exemplar_atualizar(op[0], st.session_state.get('usuario_id'), livro)
+        # else:
+        #     st.write('Nenhum exemplar cadastrado')
+
+    def excluir_exemplar():
+        exemplares = Views.exemplar_listar()
+        if exemplares:
+            op = st.selectbox('Selecione o exemplar',  exemplares)
+            if st.button('Excluir'):
+                try:
+                    Views.exemplar_excluir(op[0])
+                    time.sleep(2)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f'Erro ao excluir exemplar: {e}')
+
+    
