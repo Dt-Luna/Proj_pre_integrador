@@ -153,7 +153,7 @@ class Views:
             dao = ExemplarDAO(db.conn)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        exemplar = Exemplar(None, id_usuario, id_livro)
+        exemplar = Exemplar(None, id_usuario, id_livro, 'disponivel')
         dao.inserir(exemplar)
 
     def exemplar_listar():
@@ -179,8 +179,8 @@ class Views:
             dao = ExemplarDAO(db.conn)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        exemplar = dao.listar_por_usuario(id_usuario)
-        return exemplar
+        exemplares = dao.listar_por_usuario(id_usuario)
+        return exemplares
 
     def exemplar_listar_por_livro(id_livro):
         try:

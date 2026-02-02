@@ -15,15 +15,12 @@ class BibliotecaUI:
     def Ver():
         st.header("Listar Exemplares")
         try:
-            user_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
+            user_exemplares = Views.exemplar_listar_por_usuario(st.session_state.get("usuario_id"))
             if len(user_exemplares) == 0: st.write("Você não tem exemplares cadastrados")
             else:
-                list_dic = []
-
-                for obj in user_exemplares: list_dic.append(obj.to_df())
-                df = pd.DataFrame(list_dic)
+                df = pd.DataFrame(user_exemplares)               
                 st.dataframe(df)
-                
+
         except Exception as e:
             st.error(f"Erro ao listar exemplares: {e}")
 
@@ -34,8 +31,8 @@ class BibliotecaUI:
             op = st.selectbox("Selecione o livro modelo: ", livros)
 
             if st.button("Inserir a biblioteca"):
-                Views.exemplar_inserir(id_usuario, op)
-                st.success(f"Exemplar de {op.get_titulo()} inserido na sua biblioteca com sucesso!")
+                Views.exemplar_inserir(id_usuario, op[0])
+                st.success(f"Exemplar de inserido na sua biblioteca com sucesso!")
                 time.sleep(2)
                 st.rerun()
         else:
@@ -64,5 +61,3 @@ class BibliotecaUI:
                     st.rerun()
                 except Exception as e:
                     st.error(f'Erro ao excluir exemplar: {e}')
-
-    

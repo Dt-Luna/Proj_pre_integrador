@@ -4,16 +4,15 @@ from .dao import BaseDAO
 
 class Exemplar:
     
-    STATUS_DISPONIVEL = "disponível"
+    STATUS_DISPONIVEL = "disponivel"
     STATUS_EMPRESTADO = "emprestado"
     # STATUS_RESERVADO = "reservado"
     STATUSES_VALIDOS = [STATUS_DISPONIVEL, STATUS_EMPRESTADO]  # , STATUS_RESERVADO]
     
-    def __init__(self, id_exemplar, id_usuario, id_livro, status=STATUS_DISPONIVEL):
+    def __init__(self, id_exemplar, id_usuario, id_livro, status):
         self._id_exemplar = id_exemplar
         self._id_usuario = id_usuario
         self._id_livro = id_livro
-        self._status = None
         self.set_status(status)
 
     def get_id(self):
@@ -104,10 +103,10 @@ class ExemplarDAO(BaseDAO):
             raise DAOException.OperacaoFalhou(f"Erro ao buscar exemplar: {str(e)}")
 
     def listar_por_usuario(self, id_usuario):
-        try:
+        # try:
             query = "SELECT * FROM exemplar WHERE id_usuario = ?"
             return self._executar_query(query, (id_usuario,), fetch=True)
-        except Exception as e:
+        # except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao buscar exemplares do usuário: {str(e)}")
 
     def listar_por_livro(self, id_livro):

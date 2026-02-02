@@ -8,7 +8,7 @@ class LoginUI:
         
         email = st.text_input("Informe o e-mail")
         senha = st.text_input("Informe a senha", type="password")
-
+        
         if st.button("Entrar"):
         # try:
             # A View agora retorna um DICIONÁRIO: {'id': 1, 'username': '...', ...}

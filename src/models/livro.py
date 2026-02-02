@@ -4,13 +4,12 @@ from .dao import BaseDAO
 
 class Livro:
     
-    def __init__(self, id_livro, titulo, autor, paginas, isbn, capa=None):
+    def __init__(self, id_livro, titulo, autor, paginas, isbn):
         self._id_livro = id_livro
         self._titulo = None
         self._autor = None
         self._paginas = None
         self._isbn = None
-        self._capa = capa
         
         self.set_titulo(titulo)
         self.set_autor(autor)
@@ -49,9 +48,6 @@ class Livro:
 
     def get_capa(self):
         return self._capa
-    
-    def set_capa(self, value):
-        self._capa = value
 
     def get_isbn(self):
         return self._isbn
@@ -79,11 +75,11 @@ class LivroDAO(BaseDAO):
         try:
             query = """
             INSERT INTO livro 
-            (titulo, autor, paginas, isbn, capa)
-            VALUES (?, ?, ?, ?, ?)
+            (titulo, autor, paginas, isbn)
+            VALUES (?, ?, ?, ?)
             """
             params = (livro.get_titulo(), livro.get_autor(), 
-                     livro.get_paginas(), livro.get_isbn(), livro.get_capa())
+                     livro.get_paginas(), livro.get_isbn(),)
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao inserir livro: {str(e)}")
@@ -123,11 +119,11 @@ class LivroDAO(BaseDAO):
         try:
             query = """
             UPDATE livro 
-            SET titulo = ?, autor = ?, paginas = ?, isbn = ?, capa = ?
+            SET titulo = ?, autor = ?, paginas = ?, isbn = ?
             WHERE id_livro = ?
             """
             params = (livro.get_titulo(), livro.get_autor(), livro.get_paginas(), 
-                     livro.get_isbn(), livro.get_capa(), livro.get_id())
+                     livro.get_isbn(), livro.get_id())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar livro: {str(e)}")
