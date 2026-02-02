@@ -28,7 +28,7 @@ class SolicitacaoUI:
         solicitacoes = Views.solicitacao_listar_por_exemplar() #essa função não existe na Views, poderia criar prfvr?☢️
         #acredito que o mais direto/ ideal seria "solicitacao_listar_por_dono", mas o dono não tem o id no objeto Solicitacao, mas o id_emprestimo é capas de fazer esse link, então, fora o link em empréstimo, um outro link para retornar uma lista dos empréstimo de usuário X ☢️☢️☢️
         if solicitacoes:
-            
+            pass
         else: st.write("Não há solicitação pendente de seus exemplares")
 
     def Solicitar(): #criar uma solicitação de emprestimo de exemplar dozoto

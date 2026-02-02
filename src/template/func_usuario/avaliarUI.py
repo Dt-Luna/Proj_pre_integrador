@@ -19,7 +19,7 @@ class AvaliarUI:
             ('Dono do Exemplar', 'Comodatário do exemplar')
         )
         nota = st.feedback("stars") #cria uma linha de 5 estrelas. retorna indice de 0 a 4
-        comentario = st.text_area()
+        comentario = st.text_area("Comentário: ", "")
 
         if st.button("Enviar Avaliação"):
             #adicionar except☢️
@@ -36,7 +36,7 @@ class AvaliarUI:
 
     def avaliados():
         emprestimos = Views.emprestimo_listar()
-        if len(emprestimos) == 0: st.write("Não há empréstimos cadastrados")
+        if len(emprestimos) == 0: st.write("Nenhum empréstimos a avaliar")
         else:
             id_emprestimo = st.number_input("Insira o código do emprestimo: ")
             if st.button("Submeter"):

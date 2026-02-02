@@ -13,10 +13,10 @@ class BibliotecaUI:
         with tab4: BibliotecaUI.excluir_exemplar()
 
     def Ver():
-        st.header("Listar Exemplares")
+        #st.header("Listar Exemplares")
         try:
             user_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
-            if len(user_exemplares) == 0: st.write("Você não tem exemplares cadastrados")
+            if len(user_exemplares) == 0: st.write("Nenhum exemplar cadastrado")
             else:
                 list_dic = []
 
@@ -39,7 +39,7 @@ class BibliotecaUI:
                 time.sleep(2)
                 st.rerun()
         else:
-            st.write("Não há livro modelo cadastrado")
+            st.write("Nenhum livro modelo cadastrado")
 
     # def atualizar_exemplar():
         # exemplares = Views.exemplar_listar_por_usuario(st.session_state.get('usuario_id'))
@@ -64,5 +64,6 @@ class BibliotecaUI:
                     st.rerun()
                 except Exception as e:
                     st.error(f'Erro ao excluir exemplar: {e}')
+        else: st.write("Nenhum exemplar cadastrado")
 
     
