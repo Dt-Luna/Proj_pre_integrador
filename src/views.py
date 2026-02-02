@@ -262,10 +262,10 @@ class Views:
         finally:
             conn.close()
 ###-------------------------------------------------------------------------------------###
-    def solicitacao_inserir(id_usuario, id_livro, dias_emprestimo):
+    def solicitacao_inserir(id_usuario, id_exemplar, dias_emprestimo):
     
         try:
-            solicitacao = SolicitacaoEmprestimo(None, datetime.now().strftime("%Y-%m-%d"), "pendente", dias_emprestimo, id_livro, id_usuario)
+            solicitacao = SolicitacaoEmprestimo(None, datetime.now().strftime("%Y-%m-%d"), "pendente", dias_emprestimo, id_exemplar, id_usuario)
             dao = SolicitacaoEmprestimoDAO(conn)
             dao.inserir(solicitacao)
         finally:
