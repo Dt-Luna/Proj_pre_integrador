@@ -32,6 +32,7 @@ class Views:
         from models.dao import BaseDAO
         BaseDAO.criar_admin_padrao()
 
+    @staticmethod
     def usuario_inserir(nome, senha, email, data_nascimento):
         if not nome or not senha or not email or not data_nascimento:
             raise ValueError("Todos os campos são obrigatórios.")
@@ -43,6 +44,7 @@ class Views:
         usuario = Usuario(None, nome, senha, email, data_nascimento)
         dao.inserir(usuario)
 
+    @staticmethod
     def usuario_listar():
         try:
             db = Database()
@@ -51,6 +53,7 @@ class Views:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
         return dao.listar()
 
+    @staticmethod
     def usuario_listar_por_id(id):
         try:
             db = Database()
@@ -60,6 +63,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def usuario_listar_por_email(email):
         try:
             db = Database()
@@ -69,6 +73,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def usuario_listar_por_username(username):
         try:
             db = Database()
@@ -94,13 +99,14 @@ class Views:
             dao.excluir(id)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-    def livro_inserir(titulo, autor, paginas, isbn):
+    @staticmethod
+    def livro_inserir(titulo, autor, paginas, isbn, capa=None):
         try:
             db = Database()
             dao = LivroDAO(db.conn)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        livro = Livro(None, titulo, autor, paginas, isbn)
+        livro = Livro(None, titulo, autor, paginas, isbn, capa)
         dao.inserir(livro)
 
     @staticmethod
@@ -112,6 +118,7 @@ class Views:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
         return dao.listar()
 
+    @staticmethod
     def livro_listar_por_id(id):
         try:
             db = Database()
@@ -121,6 +128,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def livro_listar_por_titulo(titulo):
         try:
             db = Database()
@@ -130,7 +138,8 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
-    def livro_atualizar(id, titulo, autor, paginas, isbn, capa):
+    @staticmethod
+    def livro_atualizar(id, titulo, autor, paginas, isbn, capa=None):
         try:
             db = Database()
             dao = LivroDAO(db.conn)
@@ -139,6 +148,7 @@ class Views:
         livro = Livro(id, titulo, autor, paginas, isbn, capa)
         dao.atualizar(livro)
 
+    @staticmethod
     def livro_excluir(id):
         try:
             db = Database()
@@ -148,6 +158,7 @@ class Views:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
 ###-------------------------------------------------------------------------------------###
+    @staticmethod
     def exemplar_inserir(id_usuario, id_livro):
         try:
             db = Database()
@@ -157,6 +168,7 @@ class Views:
         exemplar = Exemplar(None, id_usuario, id_livro, 'disponivel')
         dao.inserir(exemplar)
 
+    @staticmethod
     def exemplar_listar():
         try:
             db = Database()
@@ -165,6 +177,7 @@ class Views:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
         return dao.listar()
 
+    @staticmethod
     def exemplar_listar_por_id(id):
         try:
             db = Database()
@@ -174,6 +187,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def exemplar_listar_por_usuario(id_usuario):
         try:
             db = Database()
@@ -183,6 +197,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def exemplar_listar_por_livro(id_livro):
         try:
             db = Database()
@@ -192,6 +207,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def exemplar_listar_por_status(status):
         try:
             db = Database()
@@ -201,6 +217,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def exemplar_atualizar(id, id_usuario, id_livro, status):
         try:
             db = Database()
@@ -210,6 +227,7 @@ class Views:
         exemplar = Exemplar(id, id_usuario, id_livro, status)
         dao.atualizar(exemplar)
 
+    @staticmethod
     def exemplar_excluir(id):
         try:
             db = Database()
@@ -219,6 +237,7 @@ class Views:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
 ###-------------------------------------------------------------------------------------###
+    @staticmethod
     def emprestimo_inserir(id_solicitacao, data_inicio, data_prevista):
         try:
             db = Database()
@@ -228,6 +247,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def emprestimo_listar():
         try:
             db = Database()
@@ -237,6 +257,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def emprestimo_listar_id(id):
         try:
             db = Database()
@@ -246,6 +267,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def emprestimo_atualizar(id, id_solicitacao, data_inicio, data_prevista, data_devolucao):
         try:
             db = Database()
@@ -256,6 +278,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def emprestimo_excluir(id):
         try:
             db = Database()
@@ -264,6 +287,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def emprestimo_listar_por_usuario(id_usuario):
         try:
             db = Database()
@@ -272,6 +296,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_inserir(id_usuario, id_exemplar, dias_emprestimo):
         try:
             db = Database()
@@ -281,6 +306,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_listar():
         try:
             db = Database()
@@ -290,6 +316,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_listar_id(id):
         try:
             db = Database()
@@ -298,6 +325,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_atualizar(id, status, dias_emprestimo, id_exemplar, id_solicitante):
         try:
             db = Database()
@@ -308,6 +336,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_excluir(id):
         try:
             db = Database()
@@ -316,6 +345,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_listar_por_usuario(id_usuario):
         try:
             db = Database()
@@ -324,6 +354,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_listar_por_exemplar(id_exemplar):
         try:
             db = Database()
@@ -332,6 +363,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def solicitacao_listar_pendentes_por_dono(id_dono):
         try:
             db = Database()
@@ -340,6 +372,7 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    @staticmethod
     def aprovar_solicitacao(id_solicitacao):
         try:
             solicitacao = Views.solicitacao_listar_id(id_solicitacao)
@@ -360,6 +393,7 @@ class Views:
         except Exception as e:
             raise Exception(f"Erro ao aprovar solicitação: {str(e)}")
 
+    @staticmethod
     def rejeitar_solicitacao(id_solicitacao):
         try:
             solicitacao = Views.solicitacao_listar_id(id_solicitacao)

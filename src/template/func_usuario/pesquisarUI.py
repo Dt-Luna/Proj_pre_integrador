@@ -15,7 +15,8 @@ class PesquisarUI:
              st.info("Nenhum livro cadastrado.")
              return
 
-        df_livros = pd.DataFrame(livros, columns=['ID', 'Título', 'Autor', 'Páginas', 'ISBN'])
+        # agora o modelo Livro inclui 'capa' como sexta coluna
+        df_livros = pd.DataFrame(livros, columns=['ID', 'Título', 'Autor', 'Páginas', 'ISBN', 'Capa'])
         
         termo = st.text_input("Digite o termo de pesquisa (título, autor):")
         
@@ -55,8 +56,20 @@ class PesquisarUI:
                 avaliacao_livro_texto = "Sem avaliações gerais ainda"
             
             with st.expander(f"**{titulo_livro}** - {autor_livro}", expanded=True):
-                # Mostrar avaliações gerais do livro
-                st.info(f"**Avaliações Gerais do Livro:** {avaliacao_livro_texto}")
+                # Mostrar capa e avaliações gerais do livro lado a lado
+                col_img, col_info = st.columns([1, 4])
+                with col_img:
+                    capa_url = livro.get('Capa') if isinstance(livro, dict) else livro['Capa']
+                    if capa_url:
+                        try:
+                            st.image(capa_url, width=120, caption=titulo_livro)
+                        except Exception:
+                            st.text("[Capa inválida]")
+                    else:
+                        st.text("[Sem capa]")
+
+                with col_info:
+                    st.info(f"**Avaliações Gerais do Livro:** {avaliacao_livro_texto}")
                 
                 # Buscar exemplares disponíveis deste livro
                 exemplares = Views.exemplar_listar_por_livro(id_livro)
