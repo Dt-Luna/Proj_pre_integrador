@@ -17,7 +17,7 @@ class Views:
     def usuario_autenticar(email, senha):
         # O DAO retorna uma TUPLA: (id, username, senha, nascimento, email)
         usuario = UsuarioDAO.autenticar(email, senha)
-        
+
         if usuario:
             # Convertendo a Tupla para Dicionário
             return {
@@ -26,9 +26,9 @@ class Views:
                 "senha": usuario[2],    # Índice 2 é a Senha
                 "data_nascimento": usuario[3], # Índice 3 é a Data de Nascimento
                 "email": usuario[4],    # Índice 4 é o Email
-                "data_nascimento": usuario[3],  # Índice 3 é a data de nascimento
             }
-        return None
+        else:
+            raise ValueError("Email ou senha inválidos.")
 
     @staticmethod
     def criar_admin():
@@ -36,6 +36,8 @@ class Views:
         BaseDAO.criar_admin_padrao()
 
     def usuario_inserir(nome, senha, email, data_nascimento):
+        if not nome or not senha or not email or not data_nascimento:
+            raise ValueError("Todos os campos são obrigatórios.")
         try:
             db = Database()
             dao = UsuarioDAO(db.conn)
@@ -255,10 +257,18 @@ class Views:
             conn.close()
         
     def emprestimo_excluir(id):
-    
+
         try:
             dao = EmprestimoDAO(conn)
             dao.excluir(id)
+        finally:
+            conn.close()
+
+    def emprestimo_listar_por_usuario(id_usuario):
+
+        try:
+            dao = EmprestimoDAO(conn)
+            return dao.listar_por_usuario(id_usuario)
         finally:
             conn.close()
 ###-------------------------------------------------------------------------------------###
@@ -289,21 +299,115 @@ class Views:
             conn.close()
 
     def solicitacao_atualizar(id, status, dias_emprestimo, id_exemplar, id_solicitante):
-    
+
         try:
-            solicitacao = SolicitacaoEmprestimo(id, datetime.now().strftime("%Y-%m-%d"), status, dias_emprestimo, id_exemplar, id_solicitante)
+            # Get existing solicitacao to keep original data
+            existing = Views.solicitacao_listar_id(id)
+            solicitacao = SolicitacaoEmprestimo(id, existing[1], status, dias_emprestimo, id_exemplar, id_solicitante)
             dao = SolicitacaoEmprestimoDAO(conn)
             dao.atualizar(solicitacao)
         finally:
             conn.close()
 
     def solicitacao_excluir(id):
-    
+
         try:
             dao = SolicitacaoEmprestimoDAO(conn)
             dao.excluir(id)
         finally:
             conn.close()
+
+    def solicitacao_listar_por_usuario(id_usuario):
+
+        try:
+            dao = SolicitacaoEmprestimoDAO(conn)
+            return dao.listar_por_usuario(id_usuario)
+        finally:
+            conn.close()
+
+    def solicitacao_listar_por_exemplar(id_exemplar):
+
+        try:
+            dao = SolicitacaoEmprestimoDAO(conn)
+            return dao.listar_por_exemplar(id_exemplar)
+        finally:
+            conn.close()
+
+    def solicitacao_listar_pendentes_por_dono(id_dono):
+
+        try:
+            dao = SolicitacaoEmprestimoDAO(conn)
+            return dao.listar_pendentes_por_dono(id_dono)
+        finally:
+            conn.close()
+
+    def aprovar_solicitacao(id_solicitacao):
+        try:
+            # Get solicitacao
+            solicitacao = Views.solicitacao_listar_id(id_solicitacao)
+            id_exemplar = solicitacao[4]
+            dias_emprestimo = solicitacao[3]
+
+            # Update solicitacao status
+            Views.solicitacao_atualizar(id_solicitacao, 'aceita', dias_emprestimo, id_exemplar, solicitacao[5])
+
+            # Create emprestimo
+            data_inicio = datetime.now().strftime("%Y-%m-%d")
+            data_prevista = (datetime.now() + timedelta(days=dias_emprestimo)).strftime("%Y-%m-%d")
+            Views.emprestimo_inserir(id_solicitacao, data_inicio, data_prevista)
+
+            # Update exemplar status
+            exemplar = Views.exemplar_listar_por_id(id_exemplar)
+            Views.exemplar_atualizar(id_exemplar, exemplar[1], exemplar[2], 'emprestado')
+
+        except Exception as e:
+            raise Exception(f"Erro ao aprovar solicitação: {str(e)}")
+
+    def rejeitar_solicitacao(id_solicitacao):
+        try:
+            solicitacao = Views.solicitacao_listar_id(id_solicitacao)
+            Views.solicitacao_atualizar(id_solicitacao, 'recusada', solicitacao[3], solicitacao[4], solicitacao[5])
+        except Exception as e:
+            raise Exception(f"Erro ao rejeitar solicitação: {str(e)}")
+
+    def confirmar_devolucao(id_emprestimo):
+        try:
+            # Update emprestimo
+            emprestimo = Views.emprestimo_listar_id(id_emprestimo)
+            Views.emprestimo_atualizar(id_emprestimo, emprestimo[1], emprestimo[2], emprestimo[3], datetime.now().strftime("%Y-%m-%d"))
+
+            # Get exemplar from solicitacao
+            solicitacao = Views.solicitacao_listar_id(emprestimo[1])
+            id_exemplar = solicitacao[4]
+            exemplar = Views.exemplar_listar_por_id(id_exemplar)
+            Views.exemplar_atualizar(id_exemplar, exemplar[1], exemplar[2], 'disponivel')
+
+        except Exception as e:
+            raise Exception(f"Erro ao confirmar devolução: {str(e)}")
+
+    def solicitar_devolucao(id_emprestimo):
+        try:
+            emprestimo = Views.emprestimo_listar_id(id_emprestimo)
+            if emprestimo[4] is not None:
+                raise Exception("Empréstimo já foi devolvido")
+            Views.emprestimo_atualizar(id_emprestimo, emprestimo[1], emprestimo[2], emprestimo[3], datetime.now().strftime("%Y-%m-%d"))
+        except Exception as e:
+            raise Exception(f"Erro ao solicitar devolução: {str(e)}")
+
+    def listar_devolucoes_pendentes_por_dono(id_dono):
+        try:
+            dao = EmprestimoDAO(conn)
+            # Query to get emprestimos where data_devolucao is set and exemplar is still emprestado and belongs to dono
+            query = """
+            SELECT e.* FROM emprestimo e
+            JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
+            JOIN exemplar ex ON s.id_exemplar = ex.id_exemplar
+            WHERE ex.id_usuario = ? AND e.data_devolucao IS NOT NULL AND ex.status = 'emprestado'
+            """
+            return dao._executar_query(query, (id_dono,), fetch=True)
+        finally:
+            conn.close()
+
 ###-------------------------------------------------------------------------------------###
     def avaliacao_inserir(id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):
         avaliacao = AvaliacaoUsuario(None, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo)
@@ -313,8 +417,6 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
         dao.inserir(avaliacao)
-        #
-        AvaliacaoUsuarioDAO.inserir(avaliacao)
 
     def avaliacao_listar():
         try:

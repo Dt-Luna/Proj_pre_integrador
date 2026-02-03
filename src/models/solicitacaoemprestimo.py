@@ -92,18 +92,28 @@ class SolicitacaoEmprestimo:
             return False
         return self.get_id() == other.get_id()
 
+    def to_df(self):
+        return {
+            'ID': self.get_id(),
+            'Data': self.get_data(),
+            'Status': self.get_status(),
+            'Dias': self.get_dias_emprestimo(),
+            'Exemplar': self.get_id_exemplar(),
+            'Solicitante': self.get_id_solicitante()
+        }
+
 
 class SolicitacaoEmprestimoDAO(BaseDAO):
 
     def inserir(self, solicitacao):
         try:
             query = """
-            INSERT INTO solicitacao_emprestimo 
-            (id_exemplar, id_solicitante, data_solicitacao, status)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO solicitacao_emprestimo
+            (data_solicitacao, status, dias_emprestimo, id_exemplar, id_solicitante)
+            VALUES (?, ?, ?, ?, ?)
             """
-            params = (solicitacao.get_id_exemplar(), solicitacao.get_id_solicitante(), 
-                     solicitacao.get_data(), solicitacao.get_status())
+            params = (solicitacao.get_data(), solicitacao.get_status(), solicitacao.get_dias_emprestimo(),
+                     solicitacao.get_id_exemplar(), solicitacao.get_id_solicitante())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao inserir solicitação: {str(e)}")
@@ -128,12 +138,12 @@ class SolicitacaoEmprestimoDAO(BaseDAO):
     def atualizar(self, solicitacao):
         try:
             query = """
-            UPDATE solicitacao_emprestimo 
-            SET id_exemplar = ?, id_solicitante = ?, data_solicitacao = ?, status = ?
+            UPDATE solicitacao_emprestimo
+            SET data_solicitacao = ?, status = ?, dias_emprestimo = ?, id_exemplar = ?, id_solicitante = ?
             WHERE id_solicitacao = ?
             """
-            params = (solicitacao.get_id_exemplar(), solicitacao.get_id_solicitante(),
-                     solicitacao.get_data(), solicitacao.get_status(), solicitacao.get_id())
+            params = (solicitacao.get_data(), solicitacao.get_status(), solicitacao.get_dias_emprestimo(),
+                     solicitacao.get_id_exemplar(), solicitacao.get_id_solicitante(), solicitacao.get_id())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao atualizar solicitação: {str(e)}")
@@ -144,3 +154,28 @@ class SolicitacaoEmprestimoDAO(BaseDAO):
             return self._executar_query(query, (id_solicitacao,))
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao excluir solicitação: {str(e)}")
+
+    def listar_por_usuario(self, id_usuario):
+        try:
+            query = "SELECT * FROM solicitacao_emprestimo WHERE id_solicitante = ?"
+            return self._executar_query(query, (id_usuario,), fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar solicitações por usuário: {str(e)}")
+
+    def listar_por_exemplar(self, id_exemplar):
+        try:
+            query = "SELECT * FROM solicitacao_emprestimo WHERE id_exemplar = ?"
+            return self._executar_query(query, (id_exemplar,), fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar solicitações por exemplar: {str(e)}")
+
+    def listar_pendentes_por_dono(self, id_dono):
+        try:
+            query = """
+            SELECT s.* FROM solicitacao_emprestimo s
+            JOIN exemplar e ON s.id_exemplar = e.id_exemplar
+            WHERE e.id_usuario = ? AND s.status = 'pendente'
+            """
+            return self._executar_query(query, (id_dono,), fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar solicitações pendentes por dono: {str(e)}")

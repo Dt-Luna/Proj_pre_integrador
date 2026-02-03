@@ -9,7 +9,7 @@ class BibliotecaUI:
         tab1, tab2, tab3, tab4 = st.tabs(["Listar Exemplares", "Adicionar exemplar", "Atualizar Exemplar", "Excluir Exemplar"])
         with tab1: BibliotecaUI.Ver()
         with tab2: BibliotecaUI.Adicionar()
-        #with tab3: BibliotecaUI.atualizar_exemplar()
+        with tab3: BibliotecaUI.atualizar_exemplar()
         with tab4: BibliotecaUI.excluir_exemplar()
 
     def Ver():
@@ -38,17 +38,22 @@ class BibliotecaUI:
         else:
             st.write("Nenhum livro modelo cadastrado")
 
-    # def atualizar_exemplar():
-        # exemplares = Views.exemplar_listar_por_usuario(st.session_state.get('usuario_id'))
-        # livros = Views.livro_listar()
-        # if exemplares:
-        #     op = st.selectbox('Selecione o exemplar', exemplares)
-        #     livro = st.selectbox('Selecione o livro', livros)
-        #     if st.button('Atualizar'):
-        #         try:
-        #             Views.exemplar_atualizar(op[0], st.session_state.get('usuario_id'), livro)
-        # else:
-        #     st.write('Nenhum exemplar cadastrado')
+    def atualizar_exemplar():
+        exemplares = Views.exemplar_listar_por_usuario(st.session_state.get('usuario_id'))
+        livros = Views.livro_listar()
+        if exemplares:
+            op = st.selectbox('Selecione o exemplar', exemplares)
+            status_op = st.selectbox('Selecione o status', ['disponivel', 'emprestado', 'indisponivel'])
+            if st.button('Atualizar'):
+                try:
+                    Views.exemplar_atualizar(op[0], op[1], op[2], status_op)
+                    st.success("Exemplar atualizado com sucesso!")
+                    time.sleep(2)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f'Erro ao atualizar exemplar: {e}')
+        else:
+            st.write('Nenhum exemplar cadastrado')
 
     def excluir_exemplar():
         exemplares = Views.exemplar_listar()

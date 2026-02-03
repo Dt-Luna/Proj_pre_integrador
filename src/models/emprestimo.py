@@ -92,10 +92,10 @@ class Emprestimo:
 
     def __str__(self):
         status = "Devolvido" if self.get_data_devolucao() else "Ativo"
-        return f"Empréstimo({self.get_id_exemplar()}) - {status} - Prazo: {self.get_data_prevista()}"
+        return f"Empréstimo({self.get_id()}) - {status} - Prazo: {self.get_data_prevista()}"
 
     def __repr__(self):
-        return f"Emprestimo(id={self.get_id()}, exemplar={self.get_id_exemplar()})"
+        return f"Emprestimo(id={self.get_id()}, solicitacao={self.get_id_solicitacao()})"
 
     def __eq__(self, other):
         if not isinstance(other, Emprestimo):
@@ -119,12 +119,11 @@ class EmprestimoDAO(BaseDAO):
     def inserir(self, emprestimo):
         try:
             query = """
-            INSERT INTO emprestimo 
-            (id_exemplar, id_dono, id_emprestado, data_inicio, data_prevista, data_devolucao)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO emprestimo
+            (id_solicitacao, data_inicio, data_prevista, data_devolucao)
+            VALUES (?, ?, ?, ?)
             """
-            params = (emprestimo.get_id_exemplar(), emprestimo.get_id_dono(), 
-                     emprestimo.get_id_emprestado(), emprestimo.get_data_inicio(), 
+            params = (emprestimo.get_id_solicitacao(), emprestimo.get_data_inicio(),
                      emprestimo.get_data_prevista(), emprestimo.get_data_devolucao())
             return self._executar_query(query, params)
         except Exception as e:
@@ -150,14 +149,12 @@ class EmprestimoDAO(BaseDAO):
     def atualizar(self, emprestimo):
         try:
             query = """
-            UPDATE emprestimo 
-            SET id_exemplar = ?, id_dono = ?, id_emprestado = ?, 
-                data_inicio = ?, data_prevista = ?, data_devolucao = ?
+            UPDATE emprestimo
+            SET id_solicitacao = ?, data_inicio = ?, data_prevista = ?, data_devolucao = ?
             WHERE id_emprestimo = ?
             """
-            params = (emprestimo.get_id_exemplar(), emprestimo.get_id_dono(), 
-                     emprestimo.get_id_emprestado(), emprestimo.get_data_inicio(), 
-                     emprestimo.get_data_prevista(), emprestimo.get_data_devolucao(), 
+            params = (emprestimo.get_id_solicitacao(), emprestimo.get_data_inicio(),
+                     emprestimo.get_data_prevista(), emprestimo.get_data_devolucao(),
                      emprestimo.get_id())
             return self._executar_query(query, params)
         except Exception as e:
@@ -169,3 +166,14 @@ class EmprestimoDAO(BaseDAO):
             return self._executar_query(query, (id_emprestimo,))
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao excluir empréstimo: {str(e)}")
+
+    def listar_por_usuario(self, id_usuario):
+        try:
+            query = """
+            SELECT e.* FROM emprestimo e
+            JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
+            WHERE s.id_solicitante = ?
+            """
+            return self._executar_query(query, (id_usuario,), fetch=True)
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar empréstimos por usuário: {str(e)}")
