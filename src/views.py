@@ -94,8 +94,6 @@ class Views:
             dao.excluir(id)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-
-###-------------------------------------------------------------------------------------###
     def livro_inserir(titulo, autor, paginas, isbn):
         try:
             db = Database()
@@ -105,6 +103,7 @@ class Views:
         livro = Livro(None, titulo, autor, paginas, isbn)
         dao.inserir(livro)
 
+    @staticmethod
     def livro_listar():
         try:
             db = Database()
