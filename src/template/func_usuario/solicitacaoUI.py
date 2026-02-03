@@ -6,53 +6,117 @@ import time
 
 class SolicitacaoUI:
     def main():
-        st.title("Solicitações")
-        tab1, tab2, tab3, tab4, tab5 = st.tabs({"Minhas Solicitações", "Solicitar Empréstimo", "Avaliar Solicitações", "Solicitar Devolução", "Confirmar Devolução"})
+        st.title("Gerenciamento de Solicitações")
+        
+        # Separar em abas mais lógicas
+        tab1, tab2, tab3 = st.tabs(["Minhas Solicitações", "✅ Avaliar Solicitações", "🔄 Devoluções"])
+        
         with tab1: SolicitacaoUI.Ver()
-        with tab2: SolicitacaoUI.Solicitar()
-        with tab3: SolicitacaoUI.Avaliar()
-        with tab4: SolicitacaoUI.SolicitarDevolucao()
-        with tab5: SolicitacaoUI.ConfirmarDevolucao()
+        with tab2: SolicitacaoUI.Avaliar()
+        with tab3: 
+            # Sub-abas para devoluções
+            subtab1, subtab2 = st.tabs(["Solicitar Devolução", "✅ Confirmar Devolução"])
+            with subtab1: SolicitacaoUI.SolicitarDevolucao()
+            with subtab2: SolicitacaoUI.ConfirmarDevolucao()
 
 
     def Ver(): #solicitações suas para outros livros. terá principalmente o status na tabela.
-        user_solicitacoes = Views.solicitacao_listar_por_usuario(st.session_state["usuario_id"]) #essa função não existe na Views, poderia criar prfvr?☢️
+        user_solicitacoes = Views.solicitacao_listar_por_usuario(st.session_state["usuario_id"])
         if user_solicitacoes:
-            list_dic = []
-            for obj in user_solicitacoes: list_dic.append(obj.to_df())
-            df = pd.DataFrame(list_dic)
+            # Criar DataFrame manualmente a partir das tuplas
+            data = []
+            for obj in user_solicitacoes:
+                data.append({
+                    'ID': obj[0],
+                    'Data': obj[1], 
+                    'Status': obj[2],
+                    'Dias': obj[3],
+                    'Exemplar': obj[4],
+                    'Solicitante': obj[5]
+                })
+            df = pd.DataFrame(data)
             st.dataframe(df)
-
         else:
             st.write("Ainda não foi submetida solicitação de empréstimo")
 
     def Avaliar(): #avaliar a solicitação dos outros para/ com os seus exemplares para criar um empréstimo.
+        st.subheader("Avaliar Solicitações de Empréstimo")
+        st.write("Aqui você pode aprovar ou rejeitar solicitações para seus exemplares.")
+        
         solicitacoes = Views.solicitacao_listar_pendentes_por_dono(st.session_state["usuario_id"])
+        
+        # Debug: mostrar informações
+        st.write(f"**Debug:** Usuário ID: {st.session_state['usuario_id']}")
+        st.write(f"**Debug:** Solicitações encontradas: {len(solicitacoes) if solicitacoes else 0}")
+        
         if solicitacoes:
+            st.success(f"Você tem {len(solicitacoes)} solicitação(ões) pendente(s):")
+            
             for obj in solicitacoes:
-                col1, col2, col3 = st.columns([2, 1, 1])
-                with col1:
-                    st.write(f"Solicitação ID: {obj[0]}, Data: {obj[1]}, Status: {obj[2]}, Dias: {obj[3]}, Exemplar: {obj[4]}, Solicitante: {obj[5]}")
-                with col2:
-                    if st.button(f"Aprovar {obj[0]}", key=f"aprovar_{obj[0]}"):
+                with st.container(border=True):
+                    col1, col2, col3 = st.columns([3, 1, 1])
+                    
+                    with col1:
+                        # Obter informações detalhadas
                         try:
-                            Views.aprovar_solicitacao(obj[0])
-                            st.success("Solicitação aprovada!")
-                            time.sleep(1)
-                            st.rerun()
+                            # Obter informações do exemplar
+                            exemplar_info = Views.exemplar_listar_por_id(obj[4])
+                            if exemplar_info:
+                                livro_info = Views.livro_listar_por_id(exemplar_info[2])
+                                nome_livro = livro_info[1] if livro_info else "Livro desconhecido"
+                                nome_exemplar = f"Exemplar {obj[4]} - {nome_livro}"
+                            else:
+                                nome_exemplar = f"Exemplar {obj[4]}"
+                            
+                            # Obter informações do solicitante
+                            solicitante_info = Views.usuario_listar_por_id(obj[5])
+                            nome_solicitante = solicitante_info[1] if solicitante_info else "Usuário desconhecido"
+                            
+                            st.markdown(f"**{nome_exemplar}**")
+                            st.markdown(f"**Solicitante:** {nome_solicitante}")
+                            st.markdown(f"**Data:** {obj[1]}")
+                            st.markdown(f"**Dias solicitados:** {obj[3]}")
+                            st.markdown(f"**Status:** {obj[2]}")
+                            
                         except Exception as e:
-                            st.error(f"Erro: {str(e)}")
-                with col3:
-                    if st.button(f"Rejeitar {obj[0]}", key=f"rejeitar_{obj[0]}"):
-                        try:
-                            Views.rejeitar_solicitacao(obj[0])
-                            st.success("Solicitação rejeitada!")
-                            time.sleep(1)
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"Erro: {str(e)}")
+                            st.error(f"Erro ao carregar detalhes: {e}")
+                            st.write(f"Solicitação ID: {obj[0]}, Data: {obj[1]}, Status: {obj[2]}, Dias: {obj[3]}, Exemplar: {obj[4]}, Solicitante: {obj[5]}")
+                    
+                    with col2:
+                        if st.button(f"Aprovar", key=f"aprovar_{obj[0]}", use_container_width=True):
+                            try:
+                                Views.aprovar_solicitacao(obj[0])
+                                st.success("Solicitação aprovada com sucesso!")
+                                time.sleep(2)
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Erro ao aprovar: {str(e)}")
+                    
+                    with col3:
+                        if st.button(f"Rejeitar", key=f"rejeitar_{obj[0]}", use_container_width=True):
+                            try:
+                                Views.rejeitar_solicitacao(obj[0])
+                                st.success("Solicitação rejeitada com sucesso!")
+                                time.sleep(2)
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Erro ao rejeitar: {str(e)}")
         else:
-            st.write("Não há solicitação pendente de seus exemplares")
+            st.info("📭 **Nenhuma solicitação pendente**")
+            st.write("Quando outros usuários solicitarem seus exemplares, elas aparecerão aqui para aprovação.")
+            
+            # Mostrar exemplares do usuário para debug
+            try:
+                meus_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
+                if meus_exemplares:
+                    st.write(f"**Seus exemplares disponíveis:** {len([ex for ex in meus_exemplares if ex[3] == 'disponivel'])}")
+                    for ex in meus_exemplares:
+                        if ex[3] == 'disponivel':
+                            st.write(f"  • Exemplar {ex[0]} - Status: {ex[3]}")
+                else:
+                    st.write("Você não possui exemplares cadastrados.")
+            except Exception as e:
+                st.error(f"Erro ao verificar seus exemplares: {e}")
 
     def Solicitar(): #criar uma solicitação de emprestimo de exemplar do outro
         id_exemplar = st.number_input("Insira o código do exemplar", min_value=1)
@@ -65,3 +129,50 @@ class SolicitacaoUI:
                 st.rerun()
             except Exception as e:
                 st.error(f"Erro: {str(e)}")
+
+    def SolicitarDevolucao(): #solicitar devolução de um empréstimo ativo
+        st.subheader("Solicitar Devolução")
+        user_emprestimos = Views.emprestimo_listar_por_usuario(st.session_state["usuario_id"])
+        
+        # Filtrar apenas empréstimos ativos (sem data de devolução)
+        emprestimos_ativos = [emp for emp in user_emprestimos if emp[4] is None]
+        
+        if emprestimos_ativos:
+            st.write("Seus empréstimos ativos:")
+            for emp in emprestimos_ativos:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"Empréstimo ID: {emp[0]}, Data Início: {emp[2]}, Data Prevista: {emp[3]}")
+                with col2:
+                    if st.button(f"Solicitar Devolução {emp[0]}", key=f"devolver_{emp[0]}"):
+                        try:
+                            Views.solicitar_devolucao(emp[0])
+                            st.success("Devolução solicitada com sucesso!")
+                            time.sleep(1)
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Erro: {str(e)}")
+        else:
+            st.write("Você não possui empréstimos ativos para devolver")
+
+    def ConfirmarDevolucao(): #confirmar devolução de seus exemplares
+        st.subheader("Confirmar Devolução")
+        devolucoes_pendentes = Views.listar_devolucoes_pendentes_por_dono(st.session_state["usuario_id"])
+        
+        if devolucoes_pendentes:
+            st.write("Devoluções pendentes de confirmação:")
+            for emp in devolucoes_pendentes:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"Empréstimo ID: {emp[0]}, Data Devolução: {emp[4]}")
+                with col2:
+                    if st.button(f"Confirmar {emp[0]}", key=f"confirmar_{emp[0]}"):
+                        try:
+                            Views.confirmar_devolucao(emp[0])
+                            st.success("Devolução confirmada com sucesso!")
+                            time.sleep(1)
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Erro: {str(e)}")
+        else:
+            st.write("Não há devoluções pendentes de confirmação")

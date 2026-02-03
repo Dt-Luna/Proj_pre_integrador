@@ -7,10 +7,11 @@ class AvaliacaoUsuario:
     NOTA_MINIMA = 1
     NOTA_MAXIMA = 5
     
-    def __init__(self, id_avaliacao, id_avaliador, tipo_avaliador, nota, comentario, data_avaliacao):
+    def __init__(self, id_avaliacao, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao):
         self._id_avaliacao = id_avaliacao
         self._id_avaliador = id_avaliador
         self._tipo_avaliador = tipo_avaliador
+        self._id_emprestimo = id_emprestimo
         self._nota = None
         self._comentario = None
         self._data_avaliacao = None
@@ -36,6 +37,12 @@ class AvaliacaoUsuario:
     
     def set_tipo_avaliador(self, value):
         self._tipo_avaliador = value
+
+    def get_id_emprestimo(self):
+        return self._id_emprestimo
+    
+    def set_id_emprestimo(self, value):
+        self._id_emprestimo = value
 
     def get_nota(self):
         return self._nota
@@ -115,6 +122,8 @@ class AvaliacaoUsuarioDAO(BaseDAO):
                     f"Avaliação não encontrada para avaliador {id_avaliador} e empréstimo {id_emprestimo}"
                 )
             return resultado
+        except AvaliacaoException.AvaliacaoNaoEncontrada:
+            raise
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
 

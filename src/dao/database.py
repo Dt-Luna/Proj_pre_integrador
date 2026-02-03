@@ -121,6 +121,25 @@ class Database:
             self.conn.close()
             logger.info("Conexão fechada")
 
+    def _executar_query(self, query, params=None, fetch=False, fetch_one=False):
+        """Executa uma query SQL com parâmetros opcionais"""
+        try:
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
+            
+            if fetch_one:
+                return self.cursor.fetchone()
+            elif fetch:
+                return self.cursor.fetchall()
+            else:
+                self.conn.commit()
+                return self.cursor.lastrowid
+        except sqlite3.Error as e:
+            logger.error(f"Erro ao executar query: {e}")
+            raise
+
     def __enter__(self):
         return self
 

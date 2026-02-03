@@ -9,9 +9,6 @@ from models.solicitacaoemprestimo import SolicitacaoEmprestimo, SolicitacaoEmpre
 from models.avaliacaousuario import AvaliacaoUsuario, AvaliacaoUsuarioDAO
 from exceptions import *
 
-import sqlite3
-conn = sqlite3.connect('bookshare.db')
-
 class Views:
     @staticmethod
     def usuario_autenticar(email, senha):
@@ -55,47 +52,49 @@ class Views:
         return dao.listar()
 
     def usuario_listar_por_id(id):
-    
         try:
-            dao = UsuarioDAO(conn)
+            db = Database()
+            dao = UsuarioDAO(db.conn)
             usuario = dao.listar_id(id)
             return usuario
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def usuario_listar_por_email(email):
-    
         try:
-            dao = UsuarioDAO(conn)
+            db = Database()
+            dao = UsuarioDAO(db.conn)
             usuario = dao.listar_por_email(email)
             return usuario
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def usuario_listar_por_username(username):
-    
         try:
-            dao = UsuarioDAO(conn)
+            db = Database()
+            dao = UsuarioDAO(db.conn)
             usuario = dao.listar_por_username(username)
             return usuario
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def usuario_atualizar(id, nome, senha, email, data_nascimento):
         usuario = Usuario(id, nome, senha, email, data_nascimento)
-        # fazer conexao com o db e instanciar o dao (se repete nos outros metodos)
         try:
             db = Database()
             dao = UsuarioDAO(db.conn)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
         dao.atualizar(usuario)
- 
 
     def usuario_excluir(id):
-        db = Database()
-        dao = UsuarioDAO(database=db.conn)
-        dao.excluir(id)
+        try:
+            db = Database()
+            dao = UsuarioDAO(db.conn)
+            dao.excluir(id)
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
 ###-------------------------------------------------------------------------------------###
     def livro_inserir(titulo, autor, paginas, isbn):
         try:
@@ -118,19 +117,19 @@ class Views:
         try:
             db = Database()
             dao = LivroDAO(db.conn)
+            livro = dao.listar_id(id)
+            return livro
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        livro = dao.listar_id(id)
-        return livro
 
     def livro_listar_por_titulo(titulo):
         try:
             db = Database()
             dao = LivroDAO(db.conn)
+            livro = dao.listar_por_titulo(titulo)
+            return livro
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        livro = dao.listar_por_titulo(titulo)
-        return livro
 
     def livro_atualizar(id, titulo, autor, paginas, isbn, capa):
         try:
@@ -145,9 +144,10 @@ class Views:
         try:
             db = Database()
             dao = LivroDAO(db.conn)
+            dao.excluir(id)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        dao.excluir(id)
+
 ###-------------------------------------------------------------------------------------###
     def exemplar_inserir(id_usuario, id_livro):
         try:
@@ -170,37 +170,37 @@ class Views:
         try:
             db = Database()
             dao = ExemplarDAO(db.conn)
+            exemplar = dao.listar_id(id)
+            return exemplar
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        exemplar = dao.listar_id(id)
-        return exemplar
 
     def exemplar_listar_por_usuario(id_usuario):
         try:
             db = Database()
             dao = ExemplarDAO(db.conn)
+            exemplares = dao.listar_por_usuario(id_usuario)
+            return exemplares
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        exemplares = dao.listar_por_usuario(id_usuario)
-        return exemplares
 
     def exemplar_listar_por_livro(id_livro):
         try:
             db = Database()
             dao = ExemplarDAO(db.conn)
+            exemplares = dao.listar_por_livro(id_livro)
+            return exemplares
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        exemplares = dao.listar_por_livro(id_livro)
-        return exemplares
 
     def exemplar_listar_por_status(status):
         try:
             db = Database()
             dao = ExemplarDAO(db.conn)
+            exemplar = dao.listar_por_status(status)
+            return exemplar
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        exemplar = dao.listar_por_status(status)
-        return exemplar
 
     def exemplar_atualizar(id, id_usuario, id_livro, status):
         try:
@@ -215,135 +215,134 @@ class Views:
         try:
             db = Database()
             dao = ExemplarDAO(db.conn)
+            dao.excluir(id)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        dao.excluir(id)
+
 ###-------------------------------------------------------------------------------------###
     def emprestimo_inserir(id_solicitacao, data_inicio, data_prevista):
-    
         try:
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             emprestimo = Emprestimo(None, id_solicitacao, data_inicio, data_prevista)
-            dao = EmprestimoDAO(conn)
             dao.inserir(emprestimo)
-        finally:
-            conn.close()
-        
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
     def emprestimo_listar():
-    
         try:
-            dao = EmprestimoDAO(conn)
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             r = dao.listar()
             return r
-        finally:
-            conn.close()
-    
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
     def emprestimo_listar_id(id):
-    
         try:
-            dao = EmprestimoDAO(conn)
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             emprestimo = dao.listar_id(id)
             return emprestimo
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def emprestimo_atualizar(id, id_solicitacao, data_inicio, data_prevista, data_devolucao):
-    
         try:
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             emprestimo = Emprestimo(id, id_solicitacao, data_inicio, data_prevista)
             emprestimo.set_data_devolucao(data_devolucao)
-            dao = EmprestimoDAO(conn)
             dao.atualizar(emprestimo)
-        finally:
-            conn.close()
-        
-    def emprestimo_excluir(id):
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
+    def emprestimo_excluir(id):
         try:
-            dao = EmprestimoDAO(conn)
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             dao.excluir(id)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def emprestimo_listar_por_usuario(id_usuario):
-
         try:
-            dao = EmprestimoDAO(conn)
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             return dao.listar_por_usuario(id_usuario)
-        finally:
-            conn.close()
-###-------------------------------------------------------------------------------------###
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
     def solicitacao_inserir(id_usuario, id_exemplar, dias_emprestimo):
-    
         try:
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             solicitacao = SolicitacaoEmprestimo(None, datetime.now().strftime("%Y-%m-%d"), "pendente", dias_emprestimo, id_exemplar, id_usuario)
-            dao = SolicitacaoEmprestimoDAO(conn)
             dao.inserir(solicitacao)
-        finally:
-            conn.close()
-        
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
     def solicitacao_listar():
-    
         try:
-            dao = SolicitacaoEmprestimoDAO(conn)
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             r = dao.listar()
             return r
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def solicitacao_listar_id(id):
-    
         try:
-            dao = SolicitacaoEmprestimoDAO(conn)
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             return dao.listar_id(id)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def solicitacao_atualizar(id, status, dias_emprestimo, id_exemplar, id_solicitante):
-
         try:
-            # Get existing solicitacao to keep original data
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             existing = Views.solicitacao_listar_id(id)
             solicitacao = SolicitacaoEmprestimo(id, existing[1], status, dias_emprestimo, id_exemplar, id_solicitante)
-            dao = SolicitacaoEmprestimoDAO(conn)
             dao.atualizar(solicitacao)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def solicitacao_excluir(id):
-
         try:
-            dao = SolicitacaoEmprestimoDAO(conn)
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             dao.excluir(id)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def solicitacao_listar_por_usuario(id_usuario):
-
         try:
-            dao = SolicitacaoEmprestimoDAO(conn)
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             return dao.listar_por_usuario(id_usuario)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def solicitacao_listar_por_exemplar(id_exemplar):
-
         try:
-            dao = SolicitacaoEmprestimoDAO(conn)
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             return dao.listar_por_exemplar(id_exemplar)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def solicitacao_listar_pendentes_por_dono(id_dono):
-
         try:
-            dao = SolicitacaoEmprestimoDAO(conn)
+            db = Database()
+            dao = SolicitacaoEmprestimoDAO(db.conn)
             return dao.listar_pendentes_por_dono(id_dono)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def aprovar_solicitacao(id_solicitacao):
         try:
-            # Get solicitacao
             solicitacao = Views.solicitacao_listar_id(id_solicitacao)
             id_exemplar = solicitacao[4]
             dias_emprestimo = solicitacao[3]
@@ -359,7 +358,6 @@ class Views:
             # Update exemplar status
             exemplar = Views.exemplar_listar_por_id(id_exemplar)
             Views.exemplar_atualizar(id_exemplar, exemplar[1], exemplar[2], 'emprestado')
-
         except Exception as e:
             raise Exception(f"Erro ao aprovar solicitação: {str(e)}")
 
@@ -381,7 +379,6 @@ class Views:
             id_exemplar = solicitacao[4]
             exemplar = Views.exemplar_listar_por_id(id_exemplar)
             Views.exemplar_atualizar(id_exemplar, exemplar[1], exemplar[2], 'disponivel')
-
         except Exception as e:
             raise Exception(f"Erro ao confirmar devolução: {str(e)}")
 
@@ -396,7 +393,8 @@ class Views:
 
     def listar_devolucoes_pendentes_por_dono(id_dono):
         try:
-            dao = EmprestimoDAO(conn)
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
             # Query to get emprestimos where data_devolucao is set and exemplar is still emprestado and belongs to dono
             query = """
             SELECT e.* FROM emprestimo e
@@ -405,42 +403,142 @@ class Views:
             WHERE ex.id_usuario = ? AND e.data_devolucao IS NOT NULL AND ex.status = 'emprestado'
             """
             return dao._executar_query(query, (id_dono,), fetch=True)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
 ###-------------------------------------------------------------------------------------###
     def avaliacao_inserir(id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):
-        avaliacao = AvaliacaoUsuario(None, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo)
+        avaliacao = AvaliacaoUsuario(None, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, datetime.now().strftime("%Y-%m-%d"))
         try:
             db = Database()
             dao = AvaliacaoUsuarioDAO(db.conn)
+            dao.inserir(avaliacao)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        dao.inserir(avaliacao)
 
     def avaliacao_listar():
         try:
             db = Database()
             dao = AvaliacaoUsuarioDAO(db.conn)
+            return dao.listar()
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
         return dao.listar()
 
     def avaliacao_listar_id(id):
-    
         try:
-            dao = AvaliacaoUsuarioDAO(conn)
+            db = Database()
+            dao = AvaliacaoUsuarioDAO(db.conn)
             return dao.listar_id(id)
-        finally:
-            conn.close()
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def avaliacao_listar_por_avaliador_emprestimo(id_avaliador, id_emprestimo):
         try:
-            dao = AvaliacaoUsuarioDAO(conn)
+            db = Database()
+            dao = AvaliacaoUsuarioDAO(db.conn)
             return dao.listar_por_avaliador_emprestimo(id_avaliador, id_emprestimo)
-        finally:
-            conn.close()
-        
+        except AvaliacaoException.AvaliacaoNaoEncontrada:
+            # Caso normal: usuário ainda não avaliou este empréstimo
+            return None
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
+    def avaliacao_listar_por_dono_exemplar(id_dono):
+        try:
+            db = Database()
+            # Query para buscar avaliações de empréstimos de exemplares do dono
+            query = """
+            SELECT av.id_avaliador, av.tipo_avaliador, av.nota, av.comentario, av.id_emprestimo, av.data_avaliacao
+            FROM avaliacao_usuario av
+            JOIN emprestimo e ON av.id_emprestimo = e.id_emprestimo
+            JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
+            JOIN exemplar ex ON s.id_exemplar = ex.id_exemplar
+            WHERE ex.id_usuario = ?
+            """
+            return db._executar_query(query, (id_dono,), fetch=True)
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
+    def avaliacao_calcular_media_por_exemplar(id_exemplar):
+        try:
+            db = Database()
+            # Query para calcular média de avaliações de um exemplar específico
+            query = """
+            SELECT AVG(av.nota) as media_nota, COUNT(*) as total_avaliacoes
+            FROM avaliacao_usuario av
+            JOIN emprestimo e ON av.id_emprestimo = e.id_emprestimo
+            JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
+            WHERE s.id_exemplar = ?
+            """
+            resultado = db._executar_query(query, (id_exemplar,), fetch_one=True)
+            
+            if resultado and resultado[0] is not None:
+                return {
+                    'media_nota': round(resultado[0], 1),
+                    'total_avaliacoes': resultado[1]
+                }
+            else:
+                return {
+                    'media_nota': 0.0,
+                    'total_avaliacoes': 0
+                }
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
+    def avaliacao_calcular_media_por_dono(id_dono):
+        try:
+            db = Database()
+            # Query para calcular média de avaliações de todos os exemplares de um dono
+            query = """
+            SELECT AVG(av.nota) as media_nota, COUNT(*) as total_avaliacoes
+            FROM avaliacao_usuario av
+            JOIN emprestimo e ON av.id_emprestimo = e.id_emprestimo
+            JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
+            JOIN exemplar ex ON s.id_exemplar = ex.id_exemplar
+            WHERE ex.id_usuario = ?
+            """
+            resultado = db._executar_query(query, (id_dono,), fetch_one=True)
+            
+            if resultado and resultado[0] is not None:
+                return {
+                    'media_nota': round(resultado[0], 1),
+                    'total_avaliacoes': resultado[1]
+                }
+            else:
+                return {
+                    'media_nota': 0.0,
+                    'total_avaliacoes': 0
+                }
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
+    def avaliacao_calcular_media_por_livro(id_livro):
+        try:
+            db = Database()
+            # Query para calcular média de avaliações de exemplares de um livro específico
+            query = """
+            SELECT AVG(av.nota) as media_nota, COUNT(*) as total_avaliacoes
+            FROM avaliacao_usuario av
+            JOIN emprestimo e ON av.id_emprestimo = e.id_emprestimo
+            JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
+            JOIN exemplar ex ON s.id_exemplar = ex.id_exemplar
+            WHERE ex.id_livro = ?
+            """
+            resultado = db._executar_query(query, (id_livro,), fetch_one=True)
+            
+            if resultado and resultado[0] is not None:
+                return {
+                    'media_nota': round(resultado[0], 1),
+                    'total_avaliacoes': resultado[1]
+                }
+            else:
+                return {
+                    'media_nota': 0.0,
+                    'total_avaliacoes': 0
+                }
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
     def avaliacao_atualizar(id, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):
         avaliacao = AvaliacaoUsuario(id, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo)

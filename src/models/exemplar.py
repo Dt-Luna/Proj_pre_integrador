@@ -6,8 +6,8 @@ class Exemplar:
     
     STATUS_DISPONIVEL = "disponivel"
     STATUS_EMPRESTADO = "emprestado"
-    # STATUS_RESERVADO = "reservado"
-    STATUSES_VALIDOS = [STATUS_DISPONIVEL, STATUS_EMPRESTADO]  # , STATUS_RESERVADO]
+    #STATUS_RESERVADO = "reservado"
+    STATUSES_VALIDOS = [STATUS_DISPONIVEL, STATUS_EMPRESTADO] #, STATUS_RESERVADO]
     
     def __init__(self, id_exemplar, id_usuario, id_livro, status):
         self._id_exemplar = id_exemplar

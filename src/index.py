@@ -6,7 +6,9 @@ from template.func_admin.CRUD_usuario import CRUD_usuario
 from template.func_usuario.bibliotecaUI import BibliotecaUI
 from template.func_usuario.solicitacaoUI import SolicitacaoUI
 from template.func_usuario.avaliarUI import AvaliarUI
-from template.func_usuario.pesquisarUI import PesquisarUI    
+from template.func_usuario.pesquisarUI import PesquisarUI
+from template.func_usuario.devolucoesUI import DevolucoesUI
+from template.func_usuario.visualizarPerfilUI import VisualizarPerfilUI
 from template.perfilUI import PerfilUI
 from template.criarcontaUI import CriarContaUI
 from template.loginUI import LoginUI
@@ -18,29 +20,46 @@ class IndexUI:
 
     @staticmethod
     def menu_visitante():
-        op = st.sidebar.selectbox("Menu", ["Entrar no Sistema", "Abrir Conta"])
-        if op == "Entrar no Sistema": LoginUI.main()
-        if op == "Abrir Conta": CriarContaUI.main()
+        op = st.sidebar.selectbox("Menu", [" Entrar no Sistema", " Abrir Conta"])
+        if op == " Entrar no Sistema": LoginUI.main()
+        if op == " Abrir Conta": CriarContaUI.main()
 
     @staticmethod
     def menu_cliente(): 
-        op = st.sidebar.selectbox("Menu", ["Perfil", "Biblioteca", "Solicitações", "Avaliar", "Pesquisa"])
-        if op == "Perfil": PerfilUI.main()
-        if op == "Biblioteca": BibliotecaUI.main()
-        if op == "Solicitações": SolicitacaoUI.main()
-        if op == "Avaliar": AvaliarUI.main()
-        if op == "Pesquisa": PesquisarUI.main()
+        op = st.sidebar.selectbox("Menu", [
+            " Perfil", 
+            " Minha Biblioteca", 
+            " Pesquisar Livros", 
+            " Solicitações", 
+            " Devoluções", 
+            " Avaliar", 
+            " Visualizar Perfis"
+        ])
+        if op == " Perfil": PerfilUI.main()
+        if op == " Minha Biblioteca": BibliotecaUI.main()
+        if op == " Pesquisar Livros": PesquisarUI.main()
+        if op == " Solicitações": SolicitacaoUI.main()
+        if op == " Devoluções": DevolucoesUI.main()
+        if op == " Avaliar": AvaliarUI.main()
+        if op == " Visualizar Perfis": VisualizarPerfilUI.main()
 
     @staticmethod
     def menu_admin():            
-        op = st.sidebar.selectbox("Menu", ["Perfil", "Usuários Comuns", "Modelo de Livro", "Avaliações", "Empréstimos", "Exemplares"])
+        op = st.sidebar.selectbox("Menu", [
+            " Perfil", 
+            " Usuários", 
+            " Modelo de Livro", 
+            " Exemplares", 
+            " Avaliações", 
+            " Empréstimos"
+        ])
         
-        if op == "Perfil": PerfilUI.main()
-        if op == "Usuários Comuns": CRUD_usuario.main()
-        if op == "Modelo de Livro": CRUD_livro.main()
-        if op == "Avaliações": CRUD_avalicao.main()
-        if op == "Empréstimos": CRUD_emprestimo.main()
-        if op == "Exemplares": CRUD_exemplar.main()
+        if op == " Perfil": PerfilUI.main()
+        if op == " Usuários": CRUD_usuario.main()
+        if op == " Modelo de Livro": CRUD_livro.main()
+        if op == " Exemplares": CRUD_exemplar.main()
+        if op == " Avaliações": CRUD_avalicao.main()
+        if op == " Empréstimos": CRUD_emprestimo.main()
 
     @staticmethod
     def sidebar():
@@ -55,9 +74,10 @@ class IndexUI:
                 is_admin = True
             
 
-            st.sidebar.write("Bem-vindo(a), " + st.session_state["usuario_nome"])
+            st.sidebar.write(f" Bem-vindo(a), **{st.session_state['usuario_nome']}**!")
 
             if is_admin: 
+                st.sidebar.success(" Modo Administrador")
                 IndexUI.menu_admin()
             else: 
                 IndexUI.menu_cliente() 
@@ -66,7 +86,7 @@ class IndexUI:
     
     @staticmethod
     def sair():
-        if st.sidebar.button("Logout"):
+        if st.sidebar.button(" Logout"):
             if "usuario_id" in st.session_state: del st.session_state["usuario_id"]
             if "usuario_nome" in st.session_state: del st.session_state["usuario_nome"]
             if "usuario_email" in st.session_state: del st.session_state["usuario_email"]
