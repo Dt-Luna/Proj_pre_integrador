@@ -8,7 +8,6 @@ class SolicitacaoUI:
     def main():
         st.title("Gerenciamento de Solicitações")
         
-        # Separar em abas mais lógicas
         tab1, tab2, tab3 = st.tabs(["Minhas Solicitações", "✅ Avaliar Solicitações", "📚 Meus Empréstimos como Dono"])
         
         with tab1: SolicitacaoUI.Ver()
@@ -42,10 +41,19 @@ class SolicitacaoUI:
             st.error("Você não está logado!")
             return
             
+        if st.button("Resetar Cache", key="reset_cache"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+            
         usuario_id = st.session_state["usuario_id"]
         usuario_nome = st.session_state.get("usuario_nome", "Desconhecido")
         
+        st.info(f"DEBUG: Usuário ID = {usuario_id} | Nome = {usuario_nome}")
+        
         solicitacoes = Views.solicitacao_listar_pendentes_por_dono(usuario_id)
+        
+        st.info(f"DEBUG: Encontradas {len(solicitacoes)} solicitações no banco")
         
         if solicitacoes:
             st.success(f"Você tem {len(solicitacoes)} solicitação(ões) pendente(s):")
