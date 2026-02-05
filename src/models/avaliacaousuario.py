@@ -7,7 +7,7 @@ class AvaliacaoUsuario:
     NOTA_MINIMA = 1
     NOTA_MAXIMA = 5
     
-    def __init__(self, id_avaliacao, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao):
+    def __init__(self, id_avaliacao, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao, anonimo=False):
         self._id_avaliacao = id_avaliacao
         self._id_avaliador = id_avaliador
         self._tipo_avaliador = tipo_avaliador
@@ -15,6 +15,7 @@ class AvaliacaoUsuario:
         self._nota = None
         self._comentario = None
         self._data_avaliacao = None
+        self._anonimo = anonimo
         
         self.set_nota(nota)
         self.set_comentario(comentario)
@@ -78,6 +79,12 @@ class AvaliacaoUsuario:
                 )
         self._data_avaliacao = value
 
+    def get_anonimo(self):
+        return self._anonimo
+    
+    def set_anonimo(self, value):
+        self._anonimo = bool(value)
+
     def __str__(self):
         return f"Avaliação: {self.get_nota()}/5 - '{self.get_comentario()[:30]}...'"
 
@@ -96,12 +103,13 @@ class AvaliacaoUsuarioDAO(BaseDAO):
         try:
             query = """
             INSERT INTO avaliacao_usuario 
-            (id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao, anonimo)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """
             params = (avaliacao.get_id_avaliador(), avaliacao.get_tipo_avaliador(), 
                      avaliacao.get_nota(), avaliacao.get_comentario(), 
-                     avaliacao.get_id_emprestimo(), avaliacao.get_data_avaliacao())
+                     avaliacao.get_id_emprestimo(), avaliacao.get_data_avaliacao(),
+                     avaliacao.get_anonimo())
             return self._executar_query(query, params)
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao inserir avaliação: {str(e)}")
@@ -126,8 +134,6 @@ class AvaliacaoUsuarioDAO(BaseDAO):
             raise
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao buscar avaliação: {str(e)}")
-
-# avaliacao vai ser salvo com chave composta de id_avaliador e id_emprestimo, mas na duvida deixa o codigo de id_avaliacao comentado
     def listar_id(self, id_avaliacao):
         try:
             query = "SELECT * FROM avaliacao_usuario WHERE id_avaliacao = ?"

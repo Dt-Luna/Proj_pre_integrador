@@ -25,7 +25,7 @@ class Views:
                 "email": usuario[4],    # Índice 4 é o Email
             }
         else:
-            raise ValueError("Email ou senha inválidos.")
+            return None
 
     @staticmethod
     def criar_admin():
@@ -51,14 +51,14 @@ class Views:
             dao = UsuarioDAO(db.conn)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
-        return dao.listar()
+        return dao.listar_seguro()
 
     @staticmethod
     def usuario_listar_por_id(id):
         try:
             db = Database()
             dao = UsuarioDAO(db.conn)
-            usuario = dao.listar_id(id)
+            usuario = dao.listar_id_seguro(id)
             return usuario
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
@@ -157,7 +157,6 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
-###-------------------------------------------------------------------------------------###
     @staticmethod
     def exemplar_inserir(id_usuario, id_livro):
         try:
@@ -236,7 +235,6 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
-###-------------------------------------------------------------------------------------###
     @staticmethod
     def emprestimo_inserir(id_solicitacao, data_inicio, data_prevista):
         try:
@@ -282,8 +280,6 @@ class Views:
     def emprestimo_excluir(id):
         try:
             db = Database()
-            dao = EmprestimoDAO(db.conn)
-            dao.excluir(id)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
@@ -295,6 +291,25 @@ class Views:
             return dao.listar_por_usuario(id_usuario)
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
+
+    @staticmethod
+    def emprestimo_listar_por_dono_exemplar(id_dono):
+        """Lista empréstimos onde o usuário é dono do exemplar"""
+        try:
+            db = Database()
+            dao = EmprestimoDAO(db.conn)
+            todos_emprestimos = dao.listar()
+            emprestimos_como_dono = []
+            
+            for emp in todos_emprestimos:
+                solicitacao = Views.solicitacao_listar_id(emp[1])
+                exemplar = Views.exemplar_listar_por_id(solicitacao[4])
+                if exemplar and exemplar[1] == id_dono:  # usuário é dono
+                    emprestimos_como_dono.append(emp)
+            
+            return emprestimos_como_dono
+        except Exception as e:
+            raise DAOException.ConexaoFalhou(f"Erro ao listar empréstimos por dono: {str(e)}")
 
     @staticmethod
     def solicitacao_inserir(id_usuario, id_exemplar, dias_emprestimo):
@@ -379,15 +394,12 @@ class Views:
             id_exemplar = solicitacao[4]
             dias_emprestimo = solicitacao[3]
 
-            # Update solicitacao status
             Views.solicitacao_atualizar(id_solicitacao, 'aceita', dias_emprestimo, id_exemplar, solicitacao[5])
 
-            # Create emprestimo
             data_inicio = datetime.now().strftime("%Y-%m-%d")
             data_prevista = (datetime.now() + timedelta(days=dias_emprestimo)).strftime("%Y-%m-%d")
             Views.emprestimo_inserir(id_solicitacao, data_inicio, data_prevista)
 
-            # Update exemplar status
             exemplar = Views.exemplar_listar_por_id(id_exemplar)
             Views.exemplar_atualizar(id_exemplar, exemplar[1], exemplar[2], 'emprestado')
         except Exception as e:
@@ -403,7 +415,6 @@ class Views:
 
     def confirmar_devolucao(id_emprestimo):
         try:
-            # Update emprestimo
             emprestimo = Views.emprestimo_listar_id(id_emprestimo)
             Views.emprestimo_atualizar(id_emprestimo, emprestimo[1], emprestimo[2], emprestimo[3], datetime.now().strftime("%Y-%m-%d"))
 
@@ -428,7 +439,6 @@ class Views:
         try:
             db = Database()
             dao = EmprestimoDAO(db.conn)
-            # Query to get emprestimos where data_devolucao is set and exemplar is still emprestado and belongs to dono
             query = """
             SELECT e.* FROM emprestimo e
             JOIN solicitacao_emprestimo s ON e.id_solicitacao = s.id_solicitacao
@@ -439,9 +449,8 @@ class Views:
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
 
-###-------------------------------------------------------------------------------------###
-    def avaliacao_inserir(id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo):
-        avaliacao = AvaliacaoUsuario(None, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, datetime.now().strftime("%Y-%m-%d"))
+    def avaliacao_inserir(id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, anonimo=False):
+        avaliacao = AvaliacaoUsuario(None, id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, datetime.now().strftime("%Y-%m-%d"), anonimo)
         try:
             db = Database()
             dao = AvaliacaoUsuarioDAO(db.conn)
