@@ -34,22 +34,15 @@ class SolicitacaoUI:
             st.write("Ainda não foi submetida solicitação de empréstimo")
 
     def Avaliar():
-        st.subheader("Avaliar Solicitações de Empréstimo")
-        st.write("Aqui você pode aprovar ou rejeitar solicitações para seus exemplares.")
+        st.subheader("Solicitações de Empréstimo Recebidas")
+        st.write("Gerencie as solicitações de empréstimo para seus exemplares.")
         
         if "usuario_id" not in st.session_state:
             st.error("Você não está logado!")
             return
             
-        if st.button("Resetar Cache", key="reset_cache"):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
-            
         usuario_id = st.session_state["usuario_id"]
         usuario_nome = st.session_state.get("usuario_nome", "Desconhecido")
-        
-        st.info(f"DEBUG: Usuário ID = {usuario_id} | Nome = {usuario_nome}")
         
         solicitacoes = Views.solicitacao_listar_pendentes_por_dono(usuario_id)
         
@@ -131,7 +124,6 @@ class SolicitacaoUI:
         usuario_id = st.session_state["usuario_id"]
         
         try:
-            # Buscar empréstimos onde o usuário é dono do exemplar
             emprestimos_como_dono = Views.emprestimo_listar_por_dono_exemplar(usuario_id)
             
             if not emprestimos_como_dono:
@@ -147,7 +139,6 @@ class SolicitacaoUI:
                     
                     with col1:
                         try:
-                            # Obter informações detalhadas
                             solicitacao = Views.solicitacao_listar_id(emp[1])
                             exemplar = Views.exemplar_listar_por_id(solicitacao[4])
                             livro = Views.livro_listar_por_id(exemplar[2])
@@ -174,7 +165,7 @@ class SolicitacaoUI:
                             st.write(f"Empréstimo ID: {emp[0]}")
                     
                     with col2:
-                        if emp[4] is None:  # Apenas empréstimos ativos podem solicitar devolução
+                        if emp[4] is None:
                             st.write("**Ações:**")
                             if st.button("Ver Detalhes", key=f"detalhes_{emp[0]}", use_container_width=True):
                                 st.info(f"Empréstimo {emp[0]} - Livro: {livro[1] if 'livro' in locals() else 'Carregando...'}")

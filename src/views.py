@@ -12,7 +12,6 @@ from exceptions import *
 class Views:
     @staticmethod
     def usuario_autenticar(email, senha):
-        # O DAO retorna uma TUPLA: (id, username, senha, nascimento, email)
         usuario = UsuarioDAO.autenticar(email, senha)
 
         if usuario:
@@ -481,7 +480,6 @@ class Views:
             dao = AvaliacaoUsuarioDAO(db.conn)
             return dao.listar_por_avaliador_emprestimo(id_avaliador, id_emprestimo)
         except AvaliacaoException.AvaliacaoNaoEncontrada:
-            # Caso normal: usuário ainda não avaliou este empréstimo
             return None
         except Exception as e:
             raise DAOException.ConexaoFalhou(f"Erro ao conectar ao banco de dados: {str(e)}")
@@ -489,7 +487,6 @@ class Views:
     def avaliacao_listar_por_dono_exemplar(id_dono):
         try:
             db = Database()
-            # Query para buscar avaliações de empréstimos de exemplares do dono
             query = """
             SELECT av.id_avaliador, av.tipo_avaliador, av.nota, av.comentario, av.id_emprestimo, av.data_avaliacao
             FROM avaliacao_usuario av
@@ -505,7 +502,6 @@ class Views:
     def avaliacao_calcular_media_por_exemplar(id_exemplar):
         try:
             db = Database()
-            # Query para calcular média de avaliações de um exemplar específico
             query = """
             SELECT AVG(av.nota) as media_nota, COUNT(*) as total_avaliacoes
             FROM avaliacao_usuario av
@@ -531,7 +527,6 @@ class Views:
     def avaliacao_calcular_media_por_dono(id_dono):
         try:
             db = Database()
-            # Query para calcular média de avaliações de todos os exemplares de um dono
             query = """
             SELECT AVG(av.nota) as media_nota, COUNT(*) as total_avaliacoes
             FROM avaliacao_usuario av
@@ -558,7 +553,6 @@ class Views:
     def avaliacao_calcular_media_por_livro(id_livro):
         try:
             db = Database()
-            # Query para calcular média de avaliações de exemplares de um livro específico
             query = """
             SELECT AVG(av.nota) as media_nota, COUNT(*) as total_avaliacoes
             FROM avaliacao_usuario av

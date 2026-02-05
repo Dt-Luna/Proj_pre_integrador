@@ -69,8 +69,7 @@ class IndexUI:
             
             is_admin = False
             
-            # Verificação provisória (ajuste conforme seu LoginUI):
-            if st.session_state.get("usuario_email") == "admin@sistema.com": # Email exato do admin no banco
+            if st.session_state.get("usuario_email") == "admin@sistema.com": 
                 is_admin = True
             
 
@@ -97,11 +96,10 @@ class IndexUI:
     def main():
         try:
             db = Database()
-            db.fechar()     # Fecha conexão, pois o DAO abrirá a sua própria depois
+            db.fechar()
         except Exception as e:
             st.error(f"Erro fatal ao iniciar banco de dados: {e}")
             return
-        # Verifica e cria o admin se não existir
         Views.criar_admin()
         IndexUI.sidebar()
 

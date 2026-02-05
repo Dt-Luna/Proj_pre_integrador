@@ -5,6 +5,7 @@ import pandas as pd
 import time
 
 class AvaliarUI:
+    @staticmethod
     def main():
         st.title("Avaliações")
         tab1, tab2, tab3 = st.tabs(["Criar Avaliação", "Minhas Avaliações", "Avaliações Recebidas"])
@@ -12,15 +13,14 @@ class AvaliarUI:
         with tab2: AvaliarUI.avaliados()
         with tab3: AvaliarUI.avaliacoes_recebidas()
 
+    @staticmethod
     def Criar():
         st.subheader("Criar Avaliação")
         st.write("Avalie empréstimos que você participou como solicitante ou como dono do exemplar.")
         
-        # Listar empréstimos finalizados para avaliação
         emprestimos = Views.emprestimo_listar_por_usuario(st.session_state["usuario_id"])
         emprestimos_finalizados = [e for e in emprestimos if e[4] is not None]  # data_devolucao not None
 
-        # Também buscar empréstimos onde o usuário é dono do exemplar
         todos_emprestimos = Views.emprestimo_listar()
         emprestimos_como_dono = []
         
@@ -48,7 +48,6 @@ class AvaliarUI:
                 livro = Views.livro_listar_por_id(exemplar[2])
                 solicitante = Views.usuario_listar_por_id(solicitacao[5])
                 
-                # Verificar se já avaliou
                 existing = Views.avaliacao_listar_por_avaliador_emprestimo(st.session_state["usuario_id"], e[0])
                 avaliado_texto = "Já avaliado" if existing else ""
                 
@@ -152,6 +151,7 @@ class AvaliarUI:
             except Exception as e:
                 st.error(f"Erro: {str(e)}")
 
+    @staticmethod
     def avaliados():
         try:
             avaliacoes = Views.avaliacao_listar()
@@ -180,18 +180,14 @@ class AvaliarUI:
                 exemplar = Views.exemplar_listar_por_id(solicitacao[4])
                 livro = Views.livro_listar_por_id(exemplar[2])
                 
-                # Obter informações do avaliado
                 if eh_anonimo:
                     nome_avaliado = "Anônimo"
                 else:
                     try:
-                        # O avaliado é o outro participante do empréstimo
                         if solicitacao[5] == st.session_state["usuario_id"]:
-                            # Usuário atual foi o solicitante, então o avaliado é o dono
                             avaliado_info = Views.usuario_listar_por_id(exemplar[1])
                             nome_avaliado = avaliado_info[1] if avaliado_info else "Usuário desconhecido"
                         else:
-                            # Usuário atual foi o dono, então o avaliado é o solicitante
                             avaliado_info = Views.usuario_listar_por_id(solicitacao[5])
                             nome_avaliado = avaliado_info[1] if avaliado_info else "Usuário desconhecido"
                     except:
@@ -215,121 +211,145 @@ class AvaliarUI:
         except Exception as e:
             st.error(f"Erro ao carregar avaliações: {str(e)}")
 
+    @staticmethod
     def avaliacoes_recebidas():
         st.subheader("Avaliações Recebidas")
         st.write("Avaliações que outros usuários fizeram sobre você em empréstimos realizados.")
         
         try:
-            # Buscar empréstimos do usuário atual (onde ele foi solicitante)
-            meus_emprestimos = Views.emprestimo_listar_por_usuario(st.session_state["usuario_id"])
-            
-            if not meus_emprestimos:
-                st.info("Você não realizou nenhum empréstimo ainda.")
-                return
-            
-            # Buscar avaliações sobre esses empréstimos
-            todas_avaliacoes = Views.avaliacao_listar()
+            avaliacoes = Views.avaliacao_listar()
+            # Estrutura: [id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao, anonimo]
             avaliacoes_recebidas = []
+            avaliacoes_como_dono = []
+            avaliacoes_como_comodatario = []
             
-            for avaliacao in todas_avaliacoes:
-                id_emprestimo = avaliacao[4]
-                id_avaliador = avaliacao[0]  # id_avaliador está no índice 0
-                
-                # Verificar se esta avaliação é sobre um empréstimo do usuário atual
-                if any(emp[0] == id_emprestimo for emp in meus_emprestimos):
-                    # Verificar se o avaliador não é o próprio usuário
-                    if id_avaliador != st.session_state["usuario_id"]:
-                        avaliacoes_recebidas.append(avaliacao)
-            
-            if not avaliacoes_recebidas:
-                st.info("Você ainda não recebeu nenhuma avaliação sobre seus empréstimos.")
-                return
-            
-            dados_avaliacoes = []
-            for avaliacao in avaliacoes_recebidas:  # Usar apenas as avaliações recebidas filtradas
-                # Estrutura correta: [id_avaliador, tipo_avaliador, nota, comentario, id_emprestimo, data_avaliacao, anonimo]
-                id_avaliador = avaliacao[0]
-                tipo_avaliador = avaliacao[1]
-                nota = avaliacao[2]
-                comentario = avaliacao[3]
-                id_emprestimo = avaliacao[4]
-                data_avaliacao = avaliacao[5]
-                eh_anonimo = bool(avaliacao[6]) if len(avaliacao) > 6 else False
-                
-                # Obter informações do avaliador (se não for anônimo)
-                if eh_anonimo:
-                    nome_avaliador = "Anônimo"
-                else:
+            for avaliacao in avaliacoes:
+                if avaliacao[0] != st.session_state["usuario_id"]:
                     try:
-                        avaliador_info = Views.usuario_listar_por_id(id_avaliador)
-                        nome_avaliador = avaliador_info[1] if avaliador_info else "Usuário desconhecido"
+                        id_emprestimo = avaliacao[4]
+                        emprestimo = Views.emprestimo_listar_id(id_emprestimo)
+                        solicitacao = Views.solicitacao_listar_id(emprestimo[1])
+                        id_exemplar = solicitacao[4]
+                        id_solicitante = solicitacao[5]
+                        
+                        meus_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
+                        if any(ex[0] == id_exemplar for ex in meus_exemplares):
+                            avaliacoes_como_dono.append(avaliacao)
+                        
+                        elif id_solicitante == st.session_state["usuario_id"]:
+                            avaliacoes_como_comodatario.append(avaliacao)
+                        
                     except:
-                        nome_avaliador = f"Usuário {id_avaliador} (inativo)"
+                        continue
+            
+            st.markdown("---")
+            st.subheader("Avaliações como Dono do Exemplar")
+            st.write("Comodatários avaliando seus exemplares:")
+            
+            if not avaliacoes_como_dono:
+                st.info("Você ainda não recebeu nenhuma avaliação como dono de exemplar.")
+            else:
+                dados_avaliacoes_dono = []
+                for avaliacao in avaliacoes_como_dono:
+                    dados = AvaliarUI._processar_avaliacao(avaliacao)
+                    if dados:
+                        dados_avaliacoes_dono.append(dados)
                 
-                emprestimo = Views.emprestimo_listar_id(id_emprestimo)
-                solicitacao = Views.solicitacao_listar_id(emprestimo[1])
-                exemplar = Views.exemplar_listar_por_id(solicitacao[4])
-                livro = Views.livro_listar_por_id(exemplar[2])
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Total", len(dados_avaliacoes_dono))
+                with col2:
+                    if dados_avaliacoes_dono:
+                        media = sum(d["Nota Numérica"] for d in dados_avaliacoes_dono) / len(dados_avaliacoes_dono)
+                        st.metric("⭐ Média", f"{media:.1f}")
+                    else:
+                        st.metric("⭐ Média", "0.0")
+                with col3:
+                    if dados_avaliacoes_dono:
+                        cinco_estrelas = len([d for d in dados_avaliacoes_dono if d["Nota Numérica"] == 5])
+                        st.metric("🌟 5 Estrelas", cinco_estrelas)
+                    else:
+                        st.metric("🌟 5 Estrelas", 0)
                 
-                if tipo_avaliador == 1:
-                    tipo = "Comodatário"
-                else:
-                    tipo = "Dono do Exemplar"
+                df_dono = pd.DataFrame(dados_avaliacoes_dono)
+                st.dataframe(df_dono, use_container_width=True)
+            
+            st.markdown("---")
+            st.subheader("Avaliações como Comodatário")
+            st.write("Donos de exemplares avaliando você como comodatário:")
+            
+            if not avaliacoes_como_comodatario:
+                st.info("Você ainda não recebeu nenhuma avaliação como comodatário.")
+            else:
+                dados_avaliacoes_comodatario = []
+                for avaliacao in avaliacoes_como_comodatario:
+                    dados = AvaliarUI._processar_avaliacao(avaliacao)
+                    if dados:
+                        dados_avaliacoes_comodatario.append(dados)
                 
-                dados_avaliacoes.append({
-                    "ID Avaliador": id_avaliador,
-                    "Livro": livro[1],
-                    "Avaliador": nome_avaliador,
-                    "Nota": "⭐" * nota,
-                    "Nota Numérica": nota,
-                    "Tipo": tipo,
-                    "Comentário": comentario or "Sem comentário",
-                    "Data": data_avaliacao or "Não informada",
-                    "Anônimo": "Sim" if eh_anonimo else "Não"
-                })
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                total_avaliacoes = len(dados_avaliacoes)
-                st.metric("Total Avaliações", total_avaliacoes)
-            
-            with col2:
-                if dados_avaliacoes:
-                    media_notas = sum([d["Nota Numérica"] for d in dados_avaliacoes]) / total_avaliacoes
-                    st.metric("⭐ Média Notas", f"{media_notas:.1f}")
-                else:
-                    st.metric("⭐ Média Notas", "0.0")
-            
-            with col3:
-                if dados_avaliacoes:
-                    avaliacoes_5_estrelas = len([d for d in dados_avaliacoes if d["Nota Numérica"] == 5])
-                    st.metric("🌟 5 Estrelas", avaliacoes_5_estrelas)
-                else:
-                    st.metric("🌟 5 Estrelas", 0)
-            
-            st.subheader("Detalhes das Avaliações")
-            df = pd.DataFrame(dados_avaliacoes)
-            st.dataframe(df, use_container_width=True)
-            
-            st.subheader("Avaliações Recentes")
-            for avaliacao in dados_avaliacoes[:3]:  # Mostrar apenas as 3 mais recentes
-                with st.container(border=True):
-                    col1, col2 = st.columns([1, 3])
-                    with col1:
-                        st.markdown(f"### {avaliacao['Nota']}")
-                        st.caption(avaliacao['Tipo'])
-                        if avaliacao['Anônimo'] == 'Sim':
-                            st.caption("Avaliação anônima")
-                    with col2:
-                        st.markdown(f"**{avaliacao['Livro']}**")
-                        if avaliacao['Anônimo'] == 'Não':
-                            st.markdown(f"*por {avaliacao['Avaliador']}*")
-                        else:
-                            st.markdown("*por usuário anônimo*")
-                        if avaliacao['Comentário'] != "Sem comentário":
-                            st.write(f"{avaliacao['Comentário']}")
-                        st.caption(f"{avaliacao['Data']}")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Total", len(dados_avaliacoes_comodatario))
+                with col2:
+                    if dados_avaliacoes_comodatario:
+                        media = sum(d["Nota Numérica"] for d in dados_avaliacoes_comodatario) / len(dados_avaliacoes_comodatario)
+                        st.metric("⭐ Média", f"{media:.1f}")
+                    else:
+                        st.metric("⭐ Média", "0.0")
+                with col3:
+                    if dados_avaliacoes_comodatario:
+                        cinco_estrelas = len([d for d in dados_avaliacoes_comodatario if d["Nota Numérica"] == 5])
+                        st.metric("🌟 5 Estrelas", cinco_estrelas)
+                    else:
+                        st.metric("🌟 5 Estrelas", 0)
+                
+                df_comodatario = pd.DataFrame(dados_avaliacoes_comodatario)
+                st.dataframe(df_comodatario, use_container_width=True)
             
         except Exception as e:
-            st.error(f"Erro ao carregar avaliações recebidas: {str(e)}")
+            st.error(f"Erro ao carregar avaliações: {str(e)}")
+
+    @staticmethod
+    def _processar_avaliacao(avaliacao):
+        """Método auxiliar para processar dados de uma avaliação"""
+        try:
+            id_avaliador = avaliacao[0]
+            tipo_avaliador = avaliacao[1]
+            nota = avaliacao[2]
+            comentario = avaliacao[3]
+            id_emprestimo = avaliacao[4]
+            data_avaliacao = avaliacao[5]
+            eh_anonimo = bool(avaliacao[6]) if len(avaliacao) > 6 else False
+            
+            if eh_anonimo:
+                nome_avaliador = "Anônimo"
+            else:
+                try:
+                    avaliador_info = Views.usuario_listar_por_id(id_avaliador)
+                    nome_avaliador = avaliador_info[1] if avaliador_info else "Usuário desconhecido"
+                except:
+                    nome_avaliador = f"Usuário {id_avaliador} (inativo)"
+            
+            emprestimo = Views.emprestimo_listar_id(id_emprestimo)
+            solicitacao = Views.solicitacao_listar_id(emprestimo[1])
+            exemplar = Views.exemplar_listar_por_id(solicitacao[4])
+            livro = Views.livro_listar_por_id(exemplar[2])
+            
+            if tipo_avaliador == 1:
+                tipo = "Comodatário"
+            else:
+                tipo = "Dono do Exemplar"
+            
+            return {
+                "ID Avaliador": id_avaliador,
+                "Livro": livro[1],
+                "Avaliador": nome_avaliador,
+                "Nota": "⭐" * nota,
+                "Nota Numérica": nota,
+                "Tipo": tipo,
+                "Comentário": comentario or "Sem comentário",
+                "Data": data_avaliacao or "Não informada",
+                "Anônimo": "Sim" if eh_anonimo else "Não"
+            }
+        except:
+            return None

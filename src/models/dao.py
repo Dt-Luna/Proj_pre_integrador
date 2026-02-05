@@ -83,7 +83,6 @@ class BaseDAO(ABC):
         conn = sqlite3.connect('bookshare.db')
         cursor = conn.cursor()
         
-        # Supondo que 'email' seja UNIQUE no seu banco
         sql = """
         INSERT OR IGNORE INTO usuario (username, senha, data_nascimento, email) 
         VALUES ('Administrador', '123456', '2000-01-01', 'admin@sistema.com')

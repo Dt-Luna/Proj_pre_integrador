@@ -15,9 +15,8 @@ class Usuario:
         self._username = None
         self._senha = None
         self._email = None
-        self._data_nascimento = None  # <--- CORREÇÃO: Adicione o underline (_)
+        self._data_nascimento = None
             
-        # Agora os métodos setters funcionam
         self.set_username(username)
         self.set_senha(senha)
         self.set_email(email)

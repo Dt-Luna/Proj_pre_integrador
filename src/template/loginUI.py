@@ -23,7 +23,6 @@ class LoginUI:
 
                 st.success(f"Bem-vindo(a), {user_nome}!")
                 
-                # Salvando na sessão
                 st.session_state["usuario_id"] = user_id
                 st.session_state["usuario_nome"] = user_nome
                 st.session_state["usuario_email"] = user_email

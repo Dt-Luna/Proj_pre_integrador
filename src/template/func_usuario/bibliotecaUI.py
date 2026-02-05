@@ -23,14 +23,12 @@ class BibliotecaUI:
             if not user_exemplares:
                 st.info("Você ainda não possui exemplares cadastrados.")
             else:
-                # Criar DataFrame com informações mais detalhadas
                 dados_exemplares = []
                 for exemplar in user_exemplares:
                     id_exemplar = exemplar[0]
                     id_livro = exemplar[2]
                     status = exemplar[3]
                     
-                    # Obter informações do livro
                     try:
                         livro_info = Views.livro_listar_por_id(id_livro)
                         if livro_info:
@@ -43,7 +41,6 @@ class BibliotecaUI:
                         titulo_livro = "Livro desconhecido"
                         autor_livro = "Desconhecido"
                     
-                    # Formatar status
                     status_icon = "🟢" if status == "disponivel" else "🔴" if status == "emprestado" else "⚠️"
                     status_text = status.replace("disponivel", "Disponível").replace("emprestado", "Emprestado")
                     
@@ -57,7 +54,6 @@ class BibliotecaUI:
                 df = pd.DataFrame(dados_exemplares)
                 st.dataframe(df, use_container_width=True, hide_index=True)
                 
-                # Estatísticas
                 total = len(user_exemplares)
                 disponiveis = len([ex for ex in user_exemplares if ex[3] == 'disponivel'])
                 emprestados = len([ex for ex in user_exemplares if ex[3] == 'emprestado'])
@@ -82,19 +78,16 @@ class BibliotecaUI:
             st.warning("Nenhum livro modelo cadastrado no sistema.")
             return
         
-        # Obter informações do usuário
         id_usuario = st.session_state.get("usuario_id")
         usuario_info = Views.usuario_listar_por_id(id_usuario)
         nome_usuario = usuario_info[1] if usuario_info else "Usuário"
         
         st.write(f"**Adicionando exemplar para:** {nome_usuario}")
         
-        # Seleção do livro
         livros_opcoes = [(f"{livro[1]} - {livro[2]}", livro[0]) for livro in livros]
         livro_selecionado = st.selectbox("Selecione o livro:", livros_opcoes)
         id_livro = livro_selecionado[1]
         
-        # Mostrar informações do livro selecionado
         livro_info = Views.livro_listar_por_id(id_livro)
         if livro_info:
             with st.container(border=True):
@@ -124,14 +117,12 @@ class BibliotecaUI:
                 st.info("Você não possui exemplares para gerenciar.")
                 return
             
-            # Preparar opções para seleção
             opcoes_exemplares = []
             for exemplar in exemplares:
                 id_exemplar = exemplar[0]
                 id_livro = exemplar[2]
                 status_atual = exemplar[3]
                 
-                # Obter título do livro
                 try:
                     livro_info = Views.livro_listar_por_id(id_livro)
                     titulo_livro = livro_info[1] if livro_info else "Livro desconhecido"
@@ -145,12 +136,10 @@ class BibliotecaUI:
                 exemplar_selecionado = st.selectbox("📚 Selecione o exemplar:", opcoes_exemplares)
                 exemplar = exemplar_selecionado[1]
                 
-                # Mostrar informações atuais
                 with st.container(border=True):
                     st.write(f"**Cód. Exemplar:** {exemplar[0]}")
                     st.write(f"**Status Atual:** {exemplar[3]}")
                 
-                # Novo status
                 status_opcoes = ['disponivel', 'emprestado']
                 status_labels = {
                     'disponivel': '🟢 Disponível para empréstimo',
@@ -186,21 +175,18 @@ class BibliotecaUI:
                 st.info("Você não possui exemplares para remover.")
                 return
             
-            # Preparar opções para seleção
             opcoes_exemplares = []
             for exemplar in exemplares:
                 id_exemplar = exemplar[0]
                 id_livro = exemplar[2]
                 status_atual = exemplar[3]
                 
-                # Obter título do livro
                 try:
                     livro_info = Views.livro_listar_por_id(id_livro)
                     titulo_livro = livro_info[1] if livro_info else "Livro desconhecido"
                 except:
                     titulo_livro = "Livro desconhecido"
                 
-                # Não permitir excluir exemplares emprestados
                 if status_atual == 'emprestado':
                     continue
                     
@@ -214,7 +200,6 @@ class BibliotecaUI:
             exemplar_selecionado = st.selectbox("Selecione o exemplar para remover:", opcoes_exemplares)
             exemplar = exemplar_selecionado[1]
             
-            # Confirmação
             with st.container(border=True):
                 st.write(f"**Tem certeza que deseja remover este exemplar?**")
                 st.write(f"**Cód. Exemplar:** {exemplar[0]}")

@@ -99,18 +99,33 @@ class PesquisarUI:
                         except:
                             avaliacao_exemplar_texto = "Sem avaliações deste exemplar"
                         
+                        avaliacoes_unificadas = []
                         try:
-                            avaliacoes_dono = Views.avaliacao_calcular_media_por_dono(id_dono)
-                            media_dono = avaliacoes_dono['media_nota']
-                            total_dono = avaliacoes_dono['total_avaliacoes']
-                            
-                            if total_dono > 0:
-                                estrelas_dono = "⭐" * round(media_dono)
-                                avaliacao_dono_texto = f"{estrelas_dono} ({media_dono}/5) - {total_dono} avaliação(ões)"
-                            else:
-                                avaliacao_dono_texto = "Sem avaliações do dono"
+                            avaliacoes_dono_lista = Views.avaliacao_listar_por_dono(id_dono)
+                            for aval in avaliacoes_dono_lista:
+                                try:
+                                    avaliador = Views.usuario_listar_por_id(aval[0])
+                                    nome_avaliador = avaliador[1] if avaliador else "Anônimo"
+                                    if len(aval) > 6 and aval[6]:  # Se for anônimo
+                                        nome_avaliador = "Anônimo"
+                                    avaliacoes_unificadas.append({
+                                        'tipo': 'Dono',
+                                        'avaliador': nome_avaliador,
+                                        'nota': aval[2],
+                                        'comentario': aval[3] or "Sem comentário",
+                                        'data': aval[5] if len(aval) > 5 else "Data não informada"
+                                    })
+                                except:
+                                    continue
                         except:
-                            avaliacao_dono_texto = "Sem avaliações do dono"
+                            pass
+                        
+                        if avaliacoes_unificadas:
+                            media_total = sum(a['nota'] for a in avaliacoes_unificadas) / len(avaliacoes_unificadas)
+                            estrelas_total = "⭐" * round(media_total)
+                            stats_texto = f"{estrelas_total} ({media_total}/5) - {len(avaliacoes_unificadas)} avaliação(ões)"
+                        else:
+                            stats_texto = "Sem avaliações ainda"
                         
                         with st.container(border=True):
                             st.markdown(f"**Cód. Exemplar:** {id_exemplar}")
@@ -118,40 +133,36 @@ class PesquisarUI:
                             st.markdown("**🟢 Status:** Disponível para empréstimo")
                             
                             st.markdown("---")
-                            col1, col2 = st.columns(2)
+                            st.markdown("**Avaliações (Dono + Exemplar):**")
+                            st.info(stats_texto)
                             
-                            with col1:
-                                st.markdown("**Avaliações do Exemplar:**")
-                                st.info(avaliacao_exemplar_texto)
-                            
-                            with col2:
-                                st.markdown("**Avaliações do Dono:**")
-                                st.success(avaliacao_dono_texto)
+                            if avaliacoes_unificadas:
+                                st.markdown("**Comentários mais recentes:**")
+                                avaliacoes_ordenadas = sorted(avaliacoes_unificadas, key=lambda x: x['data'], reverse=True)[:3]
+                                for aval in avaliacoes_ordenadas:
+                                    with st.container(border=True):
+                                        col_aval = st.columns([1, 3, 1])
+                                        with col_aval[0]:
+                                            st.write("⭐" * aval['nota'])
+                                        with col_aval[1]:
+                                            st.write(f"**{aval['avaliador']}** ({aval['tipo']})")
+                                            st.write(f"{aval['comentario']}")
+                                        with col_aval[2]:
+                                            st.write(f"*{aval['data']}*")
                             
                             st.markdown("---")
-                            col1, col2, col3 = st.columns([2, 1, 1])
-                            
-                            with col1:
-                                st.write("")
-                            with col2:
-                                if st.button("Solicitar", key=f"solicitar_{id_exemplar}", use_container_width=True):
-                                    PesquisarUI.realizar_emprestimo(id_exemplar, titulo_livro, nome_dono)
-                            with col3:
-                                st.write("⏱️")
-                                st.write("Até 30 dias")
+                            st.info("Para solicitar este exemplar, acesse a página 'Visualizar Perfil' no menu principal.")
 
     @staticmethod
     def realizar_emprestimo(id_exemplar, titulo_livro, nome_dono):
         """Método auxiliar para processar a solicitação de empréstimo"""
-        # Verifica se existe usuário logado
         if "usuario_id" not in st.session_state:
             st.error("Você precisa estar logado para solicitar um empréstimo.")
             return
 
         id_usuario = st.session_state["usuario_id"]
         
-        # Usar expander para o formulário
-        with st.expander(f"📋 Solicitar Empréstimo - {titulo_livro}", expanded=True):
+        with st.expander(f"Solicitar Empréstimo - {titulo_livro}", expanded=True):
             st.write(f"**Livro:** {titulo_livro}")
             st.write(f"**Dono:** {nome_dono}")
             st.write(f"**Cód. Exemplar:** {id_exemplar}")
