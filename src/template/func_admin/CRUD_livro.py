@@ -30,7 +30,7 @@ class CRUD_livro:
         st.header('adicionar livros')
         titulo = st.text_input('Título do livro')
         autor = st.text_input('Autor do livro')
-        paginas = st.number_input('Páginas do livro')
+        paginas = st.number_input('Páginas do livro', min_value=0, step=1)
         isbn = st.text_input('Isbn do livro')
 
         if st.button('Inserir'):

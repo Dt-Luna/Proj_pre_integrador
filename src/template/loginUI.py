@@ -41,4 +41,4 @@ class LoginUI:
         
         # except Exception as e:
             # Dica: Se der erro de novo, imprima o tipo do erro para facilitar
-            st.error(f"Ocorreu um erro no login: {type(e).__name__} - {e}")
+            #st.error(f"Ocorreu um erro no login: {type(e).__name__} - {e}")
