@@ -51,7 +51,7 @@ class CRUD_emprestimo:
                 solicitacao_id = solicitacao[0]
                 exemplar = Views.exemplar_listar_por_id(solicitacao[4])
                 livro = Views.livro_listar_por_id(exemplar[2])
-                solicitante = Views.usuario_listar_por_id(solicitacao[1])
+                solicitante = Views.usuario_listar_por_id(solicitacao[5])
                 opcoes_solicitacao[solicitacao_id] = f"ID {solicitacao_id} - {livro[1]} (Solicitante: {solicitante[1]})"
             
             selected_solicitacao_id = st.selectbox(
@@ -207,7 +207,7 @@ class CRUD_emprestimo:
                         exemplar = Views.exemplar_listar_por_id(solicitacao[4])
                         if exemplar:
                             livro = Views.livro_listar_por_id(exemplar[2])
-                            solicitante = Views.usuario_listar_por_id(solicitacao[1])
+                            solicitante = Views.usuario_listar_por_id(solicitacao[5])
                             
                             col1, col2 = st.columns(2)
                             with col1:
