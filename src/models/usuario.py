@@ -110,6 +110,26 @@ class UsuarioDAO(BaseDAO):
         except Exception as e:
             raise DAOException.OperacaoFalhou(f"Erro ao listar usuários: {str(e)}")
 
+    def listar_seguro(self):
+        try:
+            query = "SELECT id_usuario, username, email, data_nascimento FROM usuario ORDER BY username ASC"
+            return self._executar_query(query, fetch=True) or []
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao listar usuários: {str(e)}")
+
+    def listar_id_seguro(self, id_usuario):
+        """Busca usuário por ID sem incluir a senha nos resultados"""
+        try:
+            query = "SELECT id_usuario, username, email, data_nascimento FROM usuario WHERE id_usuario = ?"
+            resultado = self._executar_query(query, (id_usuario,), fetch_one=True)
+            if not resultado:
+                raise UsuarioException.UsuarioNaoEncontrado(
+                    f"Usuário {id_usuario} não encontrado"
+                )
+            return resultado
+        except Exception as e:
+            raise DAOException.OperacaoFalhou(f"Erro ao buscar usuário: {str(e)}")
+
     def listar_id(self, id_usuario):
         try:
             query = "SELECT * FROM usuario WHERE id_usuario = ?"
@@ -165,12 +185,10 @@ class UsuarioDAO(BaseDAO):
     def autenticar(cls, email, senha):
         conn = None
         try:
-            # 1. Cria a conexão manualmente
             conn = sqlite3.connect('bookshare.db') # Verifique se o nome do banco está correto
             
             dao = cls(conn) 
             
-            # 3. Usa o DAO normalmente - converter email para lowercase
             resultado = dao.listar_por_email(email.lower())
             
             if not resultado:

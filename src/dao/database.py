@@ -82,6 +82,7 @@ class Database:
                 comentario TEXT,
                 id_emprestimo INTEGER NOT NULL,
                 data_avaliacao TEXT NOT NULL,
+                anonimo INTEGER DEFAULT 0,
                 PRIMARY KEY (id_avaliador, id_emprestimo),
                 FOREIGN KEY(id_avaliador) REFERENCES usuario(id_usuario),
                 FOREIGN KEY(id_emprestimo) REFERENCES emprestimo(id_emprestimo)
@@ -89,6 +90,14 @@ class Database:
             """)
 
             self.conn.commit()
+            
+            try:
+                self.cursor.execute("ALTER TABLE avaliacao_usuario ADD COLUMN anonimo INTEGER DEFAULT 0")
+                self.conn.commit()
+                logger.info("Coluna 'anonimo' adicionada à tabela avaliacao_usuario")
+            except sqlite3.OperationalError:
+                pass
+            
             logger.info("Tabelas criadas com sucesso")
         except sqlite3.Error as e:
             logger.error(f"Erro ao criar tabelas: {e}")

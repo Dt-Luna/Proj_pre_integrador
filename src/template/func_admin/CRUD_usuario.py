@@ -18,7 +18,7 @@ class CRUD_usuario:
         try:
             usuarios = Views.usuario_listar()
             if usuarios:
-                df = DataFrame(usuarios, columns=["ID Usuário", "Nome", "Senha", "Email", "Data de Nascimento"])
+                df = DataFrame(usuarios, columns=["ID Usuário", "Nome", "Email", "Data de Nascimento"])
                 st.dataframe(df)
             else:
                 st.info("Nenhum usuário encontrado.")

@@ -9,21 +9,16 @@ class SolicitacaoUI:
         st.title("Gerenciamento de Solicitações")
         
         # Separar em abas mais lógicas
-        tab1, tab2, tab3 = st.tabs(["Minhas Solicitações", "✅ Avaliar Solicitações", "🔄 Devoluções"])
+        tab1, tab2, tab3 = st.tabs(["Minhas Solicitações", "✅ Avaliar Solicitações", "📚 Meus Empréstimos como Dono"])
         
         with tab1: SolicitacaoUI.Ver()
         with tab2: SolicitacaoUI.Avaliar()
-        with tab3: 
-            # Sub-abas para devoluções
-            subtab1, subtab2 = st.tabs(["Solicitar Devolução", "✅ Confirmar Devolução"])
-            with subtab1: SolicitacaoUI.SolicitarDevolucao()
-            with subtab2: SolicitacaoUI.ConfirmarDevolucao()
+        with tab3: SolicitacaoUI.EmprestimosComoDono()
 
 
-    def Ver(): #solicitações suas para outros livros. terá principalmente o status na tabela.
+    def Ver():
         user_solicitacoes = Views.solicitacao_listar_por_usuario(st.session_state["usuario_id"])
         if user_solicitacoes:
-            # Criar DataFrame manualmente a partir das tuplas
             data = []
             for obj in user_solicitacoes:
                 data.append({
@@ -39,15 +34,18 @@ class SolicitacaoUI:
         else:
             st.write("Ainda não foi submetida solicitação de empréstimo")
 
-    def Avaliar(): #avaliar a solicitação dos outros para/ com os seus exemplares para criar um empréstimo.
+    def Avaliar():
         st.subheader("Avaliar Solicitações de Empréstimo")
         st.write("Aqui você pode aprovar ou rejeitar solicitações para seus exemplares.")
         
-        solicitacoes = Views.solicitacao_listar_pendentes_por_dono(st.session_state["usuario_id"])
+        if "usuario_id" not in st.session_state:
+            st.error("Você não está logado!")
+            return
+            
+        usuario_id = st.session_state["usuario_id"]
+        usuario_nome = st.session_state.get("usuario_nome", "Desconhecido")
         
-        # Debug: mostrar informações
-        st.write(f"**Debug:** Usuário ID: {st.session_state['usuario_id']}")
-        st.write(f"**Debug:** Solicitações encontradas: {len(solicitacoes) if solicitacoes else 0}")
+        solicitacoes = Views.solicitacao_listar_pendentes_por_dono(usuario_id)
         
         if solicitacoes:
             st.success(f"Você tem {len(solicitacoes)} solicitação(ões) pendente(s):")
@@ -57,9 +55,7 @@ class SolicitacaoUI:
                     col1, col2, col3 = st.columns([3, 1, 1])
                     
                     with col1:
-                        # Obter informações detalhadas
                         try:
-                            # Obter informações do exemplar
                             exemplar_info = Views.exemplar_listar_por_id(obj[4])
                             if exemplar_info:
                                 livro_info = Views.livro_listar_por_id(exemplar_info[2])
@@ -68,9 +64,8 @@ class SolicitacaoUI:
                             else:
                                 nome_exemplar = f"Exemplar {obj[4]}"
                             
-                            # Obter informações do solicitante
                             solicitante_info = Views.usuario_listar_por_id(obj[5])
-                            nome_solicitante = solicitante_info[1] if solicitante_info else "Usuário desconhecido"
+                            nome_solicitante = solicitante_info[1] if solicitante_info else f"Usuário {obj[5]} (inativo)"
                             
                             st.markdown(f"**{nome_exemplar}**")
                             st.markdown(f"**Solicitante:** {nome_solicitante}")
@@ -102,10 +97,9 @@ class SolicitacaoUI:
                             except Exception as e:
                                 st.error(f"Erro ao rejeitar: {str(e)}")
         else:
-            st.info("📭 **Nenhuma solicitação pendente**")
+            st.info("**Nenhuma solicitação pendente**")
             st.write("Quando outros usuários solicitarem seus exemplares, elas aparecerão aqui para aprovação.")
             
-            # Mostrar exemplares do usuário para debug
             try:
                 meus_exemplares = Views.exemplar_listar_por_usuario(st.session_state["usuario_id"])
                 if meus_exemplares:
@@ -118,7 +112,72 @@ class SolicitacaoUI:
             except Exception as e:
                 st.error(f"Erro ao verificar seus exemplares: {e}")
 
-    def Solicitar(): #criar uma solicitação de emprestimo de exemplar do outro
+    def EmprestimosComoDono():
+        st.subheader("Meus Empréstimos como Dono")
+        st.write("Acompanhe os empréstimos ativos de seus exemplares.")
+        
+        if "usuario_id" not in st.session_state:
+            st.error("Você não está logado!")
+            return
+            
+        usuario_id = st.session_state["usuario_id"]
+        
+        try:
+            # Buscar empréstimos onde o usuário é dono do exemplar
+            emprestimos_como_dono = Views.emprestimo_listar_por_dono_exemplar(usuario_id)
+            
+            if not emprestimos_como_dono:
+                st.info("Você não tem empréstimos ativos de seus exemplares.")
+                st.write("Quando outros usuários pegarem seus livros emprestados, eles aparecerão aqui.")
+                return
+            
+            st.success(f"Você tem {len(emprestimos_como_dono)} empréstimo(s) ativo(s):")
+            
+            for emp in emprestimos_como_dono:
+                with st.container(border=True):
+                    col1, col2 = st.columns([3, 1])
+                    
+                    with col1:
+                        try:
+                            # Obter informações detalhadas
+                            solicitacao = Views.solicitacao_listar_id(emp[1])
+                            exemplar = Views.exemplar_listar_por_id(solicitacao[4])
+                            livro = Views.livro_listar_por_id(exemplar[2])
+                            solicitante = Views.usuario_listar_por_id(solicitacao[5])
+                            
+                            if emp[4] is None:  
+                                status = "🟢 Ativo"
+                                status_color = "green"
+                                data_fim = f"Prevista: {emp[3]}"
+                            else:
+                                status = "Finalizado"
+                                status_color = "blue"
+                                data_fim = f"Devolvido: {emp[4]}"
+                            
+                            st.markdown(f"### {livro[1]}")
+                            st.markdown(f"**Exemplar:** {exemplar[0]}")
+                            st.markdown(f"**Solicitante:** {solicitante[1]}")
+                            st.markdown(f"**Início:** {emp[2]}")
+                            st.markdown(f"**{data_fim}**")
+                            st.markdown(f"**Status:** <span style='color:{status_color}'>{status}</span>", unsafe_allow_html=True)
+                            
+                        except Exception as e:
+                            st.error(f"Erro ao carregar detalhes: {e}")
+                            st.write(f"Empréstimo ID: {emp[0]}")
+                    
+                    with col2:
+                        if emp[4] is None:  # Apenas empréstimos ativos podem solicitar devolução
+                            st.write("**Ações:**")
+                            if st.button("Ver Detalhes", key=f"detalhes_{emp[0]}", use_container_width=True):
+                                st.info(f"Empréstimo {emp[0]} - Livro: {livro[1] if 'livro' in locals() else 'Carregando...'}")
+                        else:
+                            st.write("**Finalizado**")
+                            st.caption("Empréstimo concluído")
+            
+        except Exception as e:
+            st.error(f"Erro ao carregar empréstimos: {str(e)}")
+
+    def Solicitar():
         id_exemplar = st.number_input("Insira o código do exemplar", min_value=1)
         dias_emprestimo = st.number_input("Informe os dias de empréstimo", min_value=1, max_value=30)
         if st.button("Solicitar Empréstimo"):
@@ -130,11 +189,10 @@ class SolicitacaoUI:
             except Exception as e:
                 st.error(f"Erro: {str(e)}")
 
-    def SolicitarDevolucao(): #solicitar devolução de um empréstimo ativo
+    def SolicitarDevolucao():
         st.subheader("Solicitar Devolução")
         user_emprestimos = Views.emprestimo_listar_por_usuario(st.session_state["usuario_id"])
         
-        # Filtrar apenas empréstimos ativos (sem data de devolução)
         emprestimos_ativos = [emp for emp in user_emprestimos if emp[4] is None]
         
         if emprestimos_ativos:
@@ -155,7 +213,7 @@ class SolicitacaoUI:
         else:
             st.write("Você não possui empréstimos ativos para devolver")
 
-    def ConfirmarDevolucao(): #confirmar devolução de seus exemplares
+    def ConfirmarDevolucao(): 
         st.subheader("Confirmar Devolução")
         devolucoes_pendentes = Views.listar_devolucoes_pendentes_por_dono(st.session_state["usuario_id"])
         

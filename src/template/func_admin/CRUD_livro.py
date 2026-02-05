@@ -37,6 +37,8 @@ class CRUD_livro:
             try:
                 Views.livro_inserir(titulo, autor, paginas, isbn)
                 st.success('Livro inserido com sucesso')
+                time.sleep(2)
+                st.rerun()
             except Exception as e:
                 st.error(f'Erro ao adicionar livro: {e}')
     
